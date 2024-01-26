@@ -1,5 +1,4 @@
 import pygame
-import pygame_gui
 import sys
 
 # Initialize Pygame
@@ -15,11 +14,8 @@ GRAY = (169, 169, 169)
 
 # Create the game window
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Top-Down Racing Game")
+pygame.display.set_caption("Mini Moto")
 clock = pygame.time.Clock()
-
-# Pygame GUI
-manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
 # Player car
 player_size = 50
@@ -43,17 +39,16 @@ track_points = [(WIDTH // 4, HEIGHT // 4),
                 (WIDTH // 4 + WIDTH // 2, HEIGHT // 4 + HEIGHT // 2),
                 (WIDTH // 4, HEIGHT // 4 + HEIGHT // 2)]
 track_rect = pygame.Rect((WIDTH // 4, HEIGHT // 4, WIDTH // 2, HEIGHT // 2))
-
-# GUI elements
-track_points_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((10, 10), (200, 30)),
-                                                 text='Track Points:')
-track_points_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((210, 10), (150, 30)),
-                                                         manager=manager)
-
+                                   #  manager=manager)
 # Function to rotate an image
-def rotate_image(image, angle):
-    rotated_image = pygame.transform.rotate(image, angle)
-    return rotated_image
+def rot_center(image, angle):
+    """rotate an image while keeping its center and size"""
+    orig_rect = image.get_rect()
+    rot_image = pygame.transform.rotate(image, angle)
+    rot_rect = orig_rect.copy()
+    rot_rect.center = rot_image.get_rect().center
+    rot_image = rot_image.subsurface(rot_rect).copy()
+    return rot_image
 
 # Game loop
 accelerating = False  # Flag to track if accelerating
@@ -74,10 +69,7 @@ while running:
                 accelerating = False
             elif event.key == pygame.K_DOWN:
                 decelerating = False
-        manager.process_events(event)
-
-    # Update Pygame GUI
-    manager.update(FPS / 1000.0)
+        # manager.process_events(event)
 
     # Player movement
     keys = pygame.key.get_pressed()
@@ -101,23 +93,14 @@ while running:
     player_velocity[1] = player_speed * pygame.math.Vector2(1, 0).rotate(-player_angle).y
     player_x += player_velocity[0]
     player_y += player_velocity[1]
-    rotated_car_image = rotate_image(race_car_image, player_angle)
+
+    rotated_car_image = rot_center(race_car_image, player_angle)
 
     # Check for collision with the track box
     if not track_rect.collidepoint(player_x + player_size // 2, player_y + player_size // 2):
         # Simple bounce off the track
         player_velocity[0] = -player_velocity[0]
         player_velocity[1] = -player_velocity[1]
-
-    # Update track points from GUI input
-    try:
-        track_points_input_str = track_points_input.get_text().replace('(', '').replace(')', '')
-        track_points = [tuple(map(int, point.split(','))) for point in track_points_input_str.split(';')]
-        track_rect = pygame.Rect(*track_points[0], track_points[2][0] - track_points[0][0], track_points[2][1] - track_points[0][1])
-    except ValueError:
-        pass  # Ignore invalid input
-
-    # Update game state
 
     # Draw background
     screen.fill(WHITE)
@@ -127,9 +110,6 @@ while running:
 
     # Draw rotated player car
     screen.blit(rotated_car_image, (player_x, player_y))
-
-    # Draw GUI
-    manager.draw_ui(screen)
 
     # Update display
     pygame.display.flip()
