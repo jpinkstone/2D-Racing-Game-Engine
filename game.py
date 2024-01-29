@@ -2,7 +2,7 @@
 from game_state import *
 from game_engine import *
 
-State = FullGameState()
+State = GameState()
 Engine = GameEngine()
 
 while (!quit):
