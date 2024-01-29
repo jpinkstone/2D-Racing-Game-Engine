@@ -1,5 +1,7 @@
 import pygame
 import sys
+from game_state import *
+import keyboard
 
 # Initialize Pygame
 pygame.init()
@@ -17,16 +19,36 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Mini Moto")
 clock = pygame.time.Clock()
 
-# Player car
-player_size = 50
-player_x = WIDTH // 2 - player_size // 2
-player_y = HEIGHT - 100
-player_speed = 1
-player_max_speed = 5  # Increased max speed
-acceleration = 1.0  # Increased acceleration
-deceleration_factor = 0.2
-player_velocity = [0, 0]
-player_angle = 0  # Initial angle in degrees
+class GameObject(PlayerGameState):                                
+# Function to rotate an image
+    def rot_center(image, angle):
+        """rotate an image while keeping its center and size"""
+        orig_rect = image.get_rect()
+        rot_image = pygame.transform.rotate(image, angle)
+        rot_rect = orig_rect.copy()
+        rot_rect.center = rot_image.get_rect().center
+        rot_image = rot_image.subsurface(rot_rect).copy()
+        return rot_image
+    
+    def accelerate(self):
+        self.player_speed += self.acceleration
+        self.player_speed = min(self.player_speed, self.player_max_speed)
+    
+    def decelerate(self):
+        self.player_speed -= self.deleration_factor
+        self.player_speed = max(self.player_speed, 0)
+
+car = GameObject()
+# # Player car
+# player_size = 50
+# player_x = WIDTH // 2 - player_size // 2
+# player_y = HEIGHT - 100
+# player_speed = 1
+# player_max_speed = 5  # Increased max speed
+# acceleration = 1.0  # Increased acceleration
+# deceleration_factor = 0.2
+# player_velocity = [0, 0]
+# player_angle = 0  # Initial angle in degrees
 
 # Load race car image
 race_car_image = pygame.image.load("race_car.png")  # Replace "race_car.png" with the actual filename of your race car image
@@ -39,21 +61,13 @@ track_points = [(WIDTH // 4, HEIGHT // 4),
                 (WIDTH // 4 + WIDTH // 2, HEIGHT // 4 + HEIGHT // 2),
                 (WIDTH // 4, HEIGHT // 4 + HEIGHT // 2)]
 track_rect = pygame.Rect((WIDTH // 4, HEIGHT // 4, WIDTH // 2, HEIGHT // 2))
-                                   #  manager=manager)
-# Function to rotate an image
-def rot_center(image, angle):
-    """rotate an image while keeping its center and size"""
-    orig_rect = image.get_rect()
-    rot_image = pygame.transform.rotate(image, angle)
-    rot_rect = orig_rect.copy()
-    rot_rect.center = rot_image.get_rect().center
-    rot_image = rot_image.subsurface(rot_rect).copy()
-    return rot_image
 
 # Game loop
 accelerating = False  # Flag to track if accelerating
 decelerating = False  # Flag to track if decelerating
 running = True
+
+
 while running:
     # Event handling
     for event in pygame.event.get():
@@ -98,6 +112,9 @@ while running:
 
     # Check for collision with the track box
     if not track_rect.collidepoint(player_x + player_size // 2, player_y + player_size // 2):
+    # Adjust position to be inside the track
+        player_x = max(min(player_x, track_rect.right - player_size), track_rect.left)
+        player_y = max(min(player_y, track_rect.bottom - player_size), track_rect.top)
         # Simple bounce off the track
         player_velocity[0] = -player_velocity[0]
         player_velocity[1] = -player_velocity[1]
