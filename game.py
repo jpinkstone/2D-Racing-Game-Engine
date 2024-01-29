@@ -4,6 +4,7 @@ from game_engine import *
 
 State = GameState()
 Engine = GameEngine()
+isServer = True
 
 while (!quit):
     startTime = time()
