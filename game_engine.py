@@ -7,6 +7,49 @@ import time
 import select
 
 class GameEngine():
+    def __init__(self):
+        try:
+            self.game_state = FullGameState()
+        except:
+            print("Initilization of Game Engine Failed.")
+
+    def add_player(self):
+        player = PlayerGameState()
+        self.game_state.add_player(player)
+
+    def get_game_state(self):
+        return self.game_state
+    
+    def update_game_state(self, game_state):
+        self.game_state = game_state
+
+    def get_keyboard_input(self):
+        running = True
+        while running:
+            # Event handling
+            for event in pygame.event.get():
+                match event:
+                    case pygame.QUIT:
+                        running = False
+                    case pygame.KEYDOWN:
+                        if event.key == pygame.K_UP:
+                            self.game_state.main_player.accelerating = True
+                        elif event.key == pygame.K_DOWN:
+                            self.game_state.main_player.decelerating = True
+                    case pygame.KEYUP:
+                        if event.key == pygame.K_UP:
+                            self.game_state.main_player.accelerating = False
+                        elif event.key == pygame.K_DOWN:
+                            self.game_state.main_player.decelerating = False
+
+    def receive_game_state(self):
+        # function of whatever networking class
+        pass
+
+    def send_game_state(self):
+        # function of whatever networking class
+        pass
+    
     class NetworkingServer():
         def networking_thread(send, receive):
             print("Starting networking thread...")
