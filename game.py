@@ -13,11 +13,17 @@ while (!quit):
     State.UpdateGameState(UserInput)
 
     # Get other networking player states and update game state
-    NetworkInput = State.unpack(Engine.Networking.getData())
+    if isServer:
+        NetworkInput = State.unpack(Engine.NetworkingServer.getData())
+    else:
+        NetworkInput = State.unpack(Engine.NetworkingClient.getData())
     State.UpdateGameState(NetworkInput)
 
     # Send current game state to other networking players
-    Engine.Networking.sendData(State.pack())
+    if isServer:
+        Engine.NetworkingServer.sendData(State.pack())
+    else:
+        Engine.NetworkingClient.sendData(State.pack())
 
     # Update the HUD from the game state
     updateHUD()
