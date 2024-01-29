@@ -5,6 +5,7 @@ import threading
 import queue
 import time
 import select
+from game_state import *
 
 class GameEngine():
     def __init__(self):
