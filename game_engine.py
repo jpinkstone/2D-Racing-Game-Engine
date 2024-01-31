@@ -11,6 +11,7 @@ class GameEngine():
     def __init__(self):
         try:
             self.game_state = FullGameState()
+            self.net = self.networking()
         except:
             print("Initilization of Game Engine Failed.")
 
@@ -32,7 +33,7 @@ class GameEngine():
         # function of whatever networking class
         pass
     
-    class networking(self):
+    class networking():
         # Initialize networking variables, connection type, and data queues
         def __init__(self, type, ip, port):
             self.type = type
