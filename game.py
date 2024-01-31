@@ -1,69 +1,75 @@
-# Main game loop file
+# Tiny Turismo game and 2D top-down racing engine
+# Made for Drexel CS 438
+# Jack Pinkstone - jsp334@drexel.edu
+# Noah Robinson - nkr38@drexel.edu
+# Casssius Garcia - cag383@drexel.edu
+
 from game_state import *
 from game_engine import *
 
-State = GameState()
-Engine = GameEngine()
+state = GameState()
+engine = GameEngine()
 isServer = True
 serverIp = "127.0.0.1"
 
 if isServer:
-    Net = Engine.networkingClass("server", "127.0.0.1", 60217)
+    Net = engine.networking("server", "127.0.0.1", 60217)
 else:
-    Net = Engine.networkingClass("client", serverIp, 60217)
+    Net = engine.networking("client", serverIp, 60217)
 
-def getKeyboard():
-    while running:
-        pass
-    # Event handling
+def getInput():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                accelerating = True
-            elif event.key == pygame.K_DOWN:
-                decelerating = True
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_UP:
-                accelerating = False
-            elif event.key == pygame.K_DOWN:
-                decelerating = False
-        if keys[pygame.K_LEFT]:
-            # player_angle += 5  # Rotate left
-            pass
-        if keys[pygame.K_RIGHT]:
-            # player_angle -= 5  # Rotate right
-            pass
+            return "stopped"
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_w:
+                return "acceleratingF"
+            if event.key == pygame.K_s:
+                return "acceleratingB"
+            if event.key == pygame.K_a:
+                return "left"
+            if event.key == pygame.K_d:
+                return "right"
+            if event.key == pygame.K_q:
+                return "stopped"
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_w:
+                return "deceleratingF"
+            if event.key == pygame.K_s:
+                return "deceleratingB"
 
 def updateHUD():
     pass
 
-def FPSControl(fps, startTime):
+def fpsControl(fps, startTime):
     pass
 
 def mainLoop(send, receive):
-    while (not quit):
-        startTime = time()
+    
+    #------------------Main Game Loop------------------#
+    while (state.status != "stopped"):
+        startTime = time.localtime()
         # Get user input and update game state
-        UserInput = getKeyboard()
-        State.UpdateGameState(UserInput)
+        userInput = getInput()
+        state.UpdateGameState("keyboard", userInput)
 
         # Get other networking player states and update game state
-        NetworkInput = State.unpack(receive())
-        State.UpdateGameState(NetworkInput)
+        networkData = receive()
+        if networkData != "None":
+            state.UpdateGameState("network", networkData)
 
         # Send current game state to other networking players
-        send(State.pack())
+        send(state.pack())
 
         # Update the HUD from the game state
         updateHUD()
 
         # Render the frame and do collisions and physics
-        Engine.Render()
+        engine.render()
 
         # Try to keep the game running at a constant FPS
-        FPSControl(30, startTime)
+        fpsControl(30, startTime)
+    #--------------------------------------------------#
 
 if __name__ == '__main__':
     Net.start(mainLoop)
