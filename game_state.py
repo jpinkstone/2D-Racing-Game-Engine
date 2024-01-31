@@ -1,32 +1,35 @@
 class GameState:
     # Initialize the total amount of players in the form of a list
-    def __init__(self,players):
+    def __init__(self):
         try:
             self.players = []
-            self.players = players
-            self.total_players = len(self.players)
             self.delimiter = "|"
+            self.status = "running"
+            self.playerId = len(self.players) + 1
+            self.players.append(playerGameState(self.playerId))
         except:
             print("Initilization of Game State Failed.")
 
-    def UpdateGameState(UserInput):
-        pass
-        
-    # Add a new player using PlayerGameState
-    def add_players(self,player):
-        self.players.append(player)
-        print("New Player Added")
-
-    def get_player_state(self, index):
-        try:
-            return self.players[index]
-        except:
-            print("ERROR: Developer trying to access a nonexistent player.")
-
-    def get_total_players(self):
-        self.total_players = len(self.players)
-        return self.total_players
+    def UpdateGameState(self, type, inputData):
+        if type == "keyboard":
+            if inputData == "stopped":
+                self.status = "stopped"
+            elif inputData == "acceleratingF":
+                self.players[self.playerId].acceleration = self.players[self.playerId].acceleration + 1
+            elif inputData == "deceleratingF":
+                self.players[self.playerId].acceleration = self.players[self.playerId].acceleration - 1
+            elif inputData == "acceleratingB":
+                self.players[self.playerId].acceleration = self.players[self.playerId].acceleration - 1
+            elif inputData == "deceleratingB":
+                self.players[self.playerId].acceleration = self.players[self.playerId].acceleration + 1
+            elif inputData == "left":
+                self.players[self.playerId].angle = self.players[self.playerId].angle - 5
+            elif inputData == "right":
+                self.players[self.playerId].angle = self.players[self.playerId].angle + 5
+        else:
+            self.unpack(inputData)
     
+    # Needs to be fixed to include entire game state
     def pack(self):
         encoded_data = ""
         
@@ -38,6 +41,7 @@ class GameState:
 
         return encoded_data
 
+    # Needs to be fixed to include entire game state
     def unpack(self,encoded_data):
         decoded_data = encoded_data.split(self.delimiter)
         j = 0
@@ -49,12 +53,12 @@ class GameState:
                 exec(f'self.players[{i}].{key}={decoded_data[j]}')
                 j+=1
 
-class PlayerGameState:
-    def __init__(self,size, width,height):
+class playerGameState:
+    def __init__(self, id, width, height):
         # Player car info
-        self.player_size = size
-        self.player_x = width
-        self.player_y = height
+        self.playerId = id
+        self.player_x = 50
+        self.player_y = 50
         self.player_speed = 1
         self.player_max_speed = 5  # Increased max speed
         self.acceleration = 1.0  # Increased acceleration
@@ -66,9 +70,7 @@ class PlayerGameState:
         self.player_velocity[0] = 0
         self.player_velocity[1] = 0
         self.score = 0
-    
-    def get_loc(self):
-        return self.player_x, self.player_y
+
     
 # def test_encoding_decoding(game_state):
 #     before_encoding = []
