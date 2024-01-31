@@ -1,2 +1,3 @@
-# 2D-Racing-Game-Engine
+# Tiny Turismo
+## 2D-Racing-Game-Engine
 A custom game engine built for the CS 438 class
