@@ -83,16 +83,17 @@ while running:
                 accelerating = False
             elif event.key == pygame.K_DOWN:
                 decelerating = False
+        if keys[pygame.K_LEFT]:
+            player_angle += 5  # Rotate left
+        if keys[pygame.K_RIGHT]:
+            player_angle -= 5  # Rotate right
         # manager.process_events(event)
 
     # Player movement
     keys = pygame.key.get_pressed()
     player_velocity[0] = 0
     player_velocity[1] = 0
-    if keys[pygame.K_LEFT]:
-        player_angle += 5  # Rotate left
-    if keys[pygame.K_RIGHT]:
-        player_angle -= 5  # Rotate right
+    
 
     # Acceleration
     if accelerating:
