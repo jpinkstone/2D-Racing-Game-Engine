@@ -35,7 +35,25 @@ while (!quit):
     FPScontrol(30, startTime)
 
 def getKeyboard():
-    pass
+    while running:
+    # Event handling
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                accelerating = True
+            elif event.key == pygame.K_DOWN:
+                decelerating = True
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                accelerating = False
+            elif event.key == pygame.K_DOWN:
+                decelerating = False
+        if keys[pygame.K_LEFT]:
+            # player_angle += 5  # Rotate left
+        if keys[pygame.K_RIGHT]:
+            # player_angle -= 5  # Rotate right
 
 def updateHUD():
     pass
