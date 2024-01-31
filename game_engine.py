@@ -1,17 +1,14 @@
-import pygame
-import sys
 import socket
 import threading
 import queue
-import time
 import select
+import time
 from game_state import *
 
 class GameEngine():
     def __init__(self):
         try:
-            self.game_state = FullGameState()
-            self.net = self.networking()
+            pass
         except:
             print("Initilization of Game Engine Failed.")
 
@@ -33,7 +30,7 @@ class GameEngine():
         # function of whatever networking class
         pass
     
-    class networking():
+    class networkingClass():
         # Initialize networking variables, connection type, and data queues
         def __init__(self, type, ip, port):
             self.type = type
@@ -147,5 +144,11 @@ class GameEngine():
                         
             s.close()
     
-    class Render():
+    class renderClass():
+        pass
+
+    class audioClass():
+        pass
+
+    class physicsClass():
         pass
