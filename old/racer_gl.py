@@ -1,3 +1,4 @@
+# Game physics prototype
 import pygame
 import sys
 
