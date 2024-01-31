@@ -24,25 +24,6 @@ class GameEngine():
     def update_game_state(self, game_state):
         self.game_state = game_state
 
-    def get_keyboard_input(self):
-        running = True
-        while running:
-            # Event handling
-            for event in pygame.event.get():
-                match event:
-                    case pygame.QUIT:
-                        running = False
-                    case pygame.KEYDOWN:
-                        if event.key == pygame.K_UP:
-                            self.game_state.main_player.accelerating = True
-                        elif event.key == pygame.K_DOWN:
-                            self.game_state.main_player.decelerating = True
-                    case pygame.KEYUP:
-                        if event.key == pygame.K_UP:
-                            self.game_state.main_player.accelerating = False
-                        elif event.key == pygame.K_DOWN:
-                            self.game_state.main_player.decelerating = False
-
     def receive_game_state(self):
         # function of whatever networking class
         pass
