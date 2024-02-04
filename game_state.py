@@ -10,7 +10,7 @@ class GameState:
         except:
             print("Initilization of Game State Failed.")
 
-    def UpdateGameState(self, type, inputData):
+    def updateGameState(self, type, inputData):
         if type == "keyboard":
             if inputData == "stopped":
                 self.status = "stopped"
@@ -29,7 +29,7 @@ class GameState:
         else:
             self.unpack(inputData)
     
-    # Needs to be fixed to include entire game state
+    # FIXME: Needs to be fixed to include entire game state
     def pack(self):
         encoded_data = ""
         
@@ -41,7 +41,7 @@ class GameState:
 
         return encoded_data
 
-    # Needs to be fixed to include entire game state
+    # FIXME: Needs to be fixed to include entire game state
     def unpack(self,encoded_data):
         decoded_data = encoded_data.split(self.delimiter)
         j = 0
@@ -52,10 +52,17 @@ class GameState:
             for key in player_data:
                 exec(f'self.players[{i}].{key}={decoded_data[j]}')
                 j+=1
+    
+    # FIXME: Function meant to sync data of different player states
+    # for example: changing player id's within the game state
+    def sync(self):
+        pass
 
 class playerGameState:
     def __init__(self, id, width, height):
         # Player car info
+        self.width = width
+        self.height = height
         self.playerId = id
         self.player_x = 50
         self.player_y = 50
