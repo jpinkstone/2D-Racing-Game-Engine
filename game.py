@@ -44,10 +44,11 @@ def getInput():
 def updateHUD():
     pass
 
-# sleeps the remainder of the frame time, returns the change of time
+# uses the remainder of the frame time
 def fpsControl(fps, startTime):
-    dt = clock.tick(fps)
-    return dt
+    frameTime = 1/fps
+    while((time.localtime() - startTime) < frameTime):
+        continue
 
 def mainLoop(send, receive):
     
