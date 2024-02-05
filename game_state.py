@@ -1,8 +1,8 @@
 class GameState:
     # Initialize the total amount of players in the form of a list
-    def __init__(self):
+    def __init__(self,players = []):
         try:
-            self.players = []
+            self.players = players
             self.delimiter = "|"
             self.status = 1
             self.playerId = len(self.players) + 1
