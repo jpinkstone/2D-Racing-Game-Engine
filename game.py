@@ -12,9 +12,6 @@ engine = GameEngine()
 isServer = True
 serverIp = "127.0.0.1"
 
-# Create a clock object
-clock = pygame.time.Clock()
-
 if isServer:
     Net = engine.networking("server", "127.0.0.1", 60217)
 else:
@@ -47,6 +44,7 @@ def updateHUD():
 # uses the remainder of the frame time, returns the change in time
 def fpsControl(fps, startTime):
     frameTime = 1/fps
+    dt = time.localtime() - startTime
     while(dt < frameTime):
         dt = time.localtime() - startTime
     return dt
@@ -55,7 +53,7 @@ def mainLoop(send, receive):
     
     #------------------Main Game Loop------------------#
     while (state.status != "stopped"):
-        # startTime = time.localtime()
+        startTime = time.localtime()
         # Get user input and update game state
         userInput = getInput()
         state.updateGameState("keyboard", userInput)
