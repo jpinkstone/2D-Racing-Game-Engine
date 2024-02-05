@@ -47,6 +47,27 @@ class Car:
     def decelerate(self):
         self.speed -= self.deceleration_factor
         self.speed = max(self.speed, 0)
+    # def drift(self, keys):
+    #     if (keys[pygame.K_SPACE] and keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]) or (self.speed > 6 and keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]) and not keys[pygame.K_DOWN]:
+    #         print("Drifting")
+    #         if keys[pygame.K_a] and self.drift_distance < 50:
+    #             self.drift_distance += 1
+    #         elif keys[pygame.K_d] and self.drift_distance > -50:
+    #             self.drift_distance -= 1
+    #     else:
+    #         if self.drift_distance > 0:
+    #             self.drift_distance -= 1
+    #             if self.speed > 1:
+    #                 self.speed -= 0.1
+    #             if self.drift_distance < 0:
+    #                 self.drift_distance = 0
+    #         elif self.drift_distance < 0:
+    #             self.drift_distance += 1
+    #             if self.speed > 1:
+    #                 self.speed -= 0.1
+
+    #             if self.drift_distance > 0:
+    #                 self.drift_distance = 0
 
 car = Car()
 
@@ -95,6 +116,8 @@ while running:
     elif car.decelerating:
         car.decelerate()
 
+    # car.drift(keys)
+    
     # Update player position and rotation
     car.velocity[0] = car.speed * pygame.math.Vector2(1, 0).rotate(-car.angle).x
     car.velocity[1] = car.speed * pygame.math.Vector2(1, 0).rotate(-car.angle).y
