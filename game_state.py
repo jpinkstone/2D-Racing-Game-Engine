@@ -4,11 +4,14 @@ class GameState:
         try:
             self.players = []
             self.delimiter = "|"
-            self.status = "running"
+            self.status = 1
             self.playerId = len(self.players) + 1
-            self.players.append(playerGameState(self.playerId))
+            print(vars(self))
         except:
             print("Initilization of Game State Failed.")
+
+    def addPlayer(self,player):
+        self.players.append(player)
 
     def updateGameState(self, type, inputData):
         if type == "keyboard":
@@ -29,11 +32,16 @@ class GameState:
         else:
             self.unpack(inputData)
     
-    # FIXME: Needs to be fixed to include entire game state
     def pack(self):
         encoded_data = ""
+
+        game_state_vars = vars(self)
+
+        for key in game_state_vars.keys():
+            if key == 'players' or key == 'delimiter': continue
+            encoded_data += str(game_state_vars[key]) + self.delimiter
         
-        for i in range(self.get_total_players()):
+        for i in range(len(self.players)):
             player = self.players[i]
             player_data = vars(player)
             for j in player_data:
@@ -41,11 +49,17 @@ class GameState:
 
         return encoded_data
 
-    # FIXME: Needs to be fixed to include entire game state
     def unpack(self,encoded_data):
         decoded_data = encoded_data.split(self.delimiter)
+        game_state_vars = vars(self)
+        print(game_state_vars)
         j = 0
-        for i in range(self.get_total_players()):
+        for key in game_state_vars.keys():
+            if key == 'players' or key == 'delimiter': continue
+            exec(f'self.{key}={decoded_data[j]}')
+            j = j + 1
+        
+        for i in range(len(self.players)):
             player = self.players[i]
             player_data = vars(player)
             #print(player_data)
@@ -58,7 +72,7 @@ class GameState:
     def sync(self):
         pass
 
-class playerGameState:
+class PlayerGameState:
     def __init__(self, id, width, height):
         # Player car info
         self.width = width
@@ -109,25 +123,19 @@ class playerGameState:
 #     return True
     
 
-# if __name__ == "__main__":
-#     # Example:
-#     #    Create four players, add another player, test the encoding and decoding for the 
-#     WIDTH, HEIGHT = 800, 600
-#     player_size = 50
-#     total_players = 3
-#     players = []
+if __name__ == "__main__":
+    # Example:
+    #    Create four players, add another player, test the encoding and decoding for the 
+    WIDTH, HEIGHT = 800, 600
+    player_size = 50
+      
+    game_state = GameState()
+    total_size_bytes = 0
+    game_state.addPlayer(PlayerGameState(1,WIDTH // 2 - player_size // 2,HEIGHT//2))
 
-#     for i in range(total_players):      
-#         players.append(PlayerGameState(player_size,WIDTH // 2 - player_size // 2,HEIGHT//2))
-        
-#     game_state = FullGameState(players)
-#     total_size_bytes = 0
-#     game_state.add_players(PlayerGameState(player_size,WIDTH // 2 - player_size // 2,HEIGHT//2))
-
-#     print("Total Players: " + str(game_state.get_total_players()))
+    packed = game_state.pack()
+    game_state.unpack(packed)
+    print(vars(game_state.players[0]))
+    #print(vars(game_state))
     
-#     for i in range(game_state.get_total_players()):
-#         player_state = game_state.get_player_state(i)
-#         print("Game State of Player " + str(i) + ": " + str(player_state))
-
-#     if(test_encoding_decoding(game_state)): print("Encoding and Decoding worked properly!")
+    #if(test_encoding_decoding(game_state)): print("Encoding and Decoding worked properly!")
