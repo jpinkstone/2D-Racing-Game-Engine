@@ -8,7 +8,7 @@ from game_state import *
 from game_engine import *
 
 state = GameState()
-engine = GameEngine()
+engine = GameEngine(state)
 isServer = True
 serverIp = "127.0.0.1"
 
@@ -17,51 +17,31 @@ if isServer:
 else:
     Net = engine.networking("client", serverIp, 60217)
 
-def getInput():
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            return "stopped"
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                return "acceleratingF"
-            if event.key == pygame.K_s:
-                return "acceleratingB"
-            if event.key == pygame.K_a:
-                return "left"
-            if event.key == pygame.K_d:
-                return "right"
-            if event.key == pygame.K_q:
-                return "stopped"
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_w:
-                return "deceleratingF"
-            if event.key == pygame.K_s:
-                return "deceleratingB"
-
 def updateHUD():
     pass
 
-# uses the remainder of the frame time, returns the change in time
-def fpsControl(fps, startTime):
-    frameTime = 1/fps
-    dt = time.localtime() - startTime
-    while(dt < frameTime):
-        dt = time.localtime() - startTime
-    return dt
+# # uses the remainder of the frame time, returns the change in time
+# def fpsControl(fps, startTime):
+#     frameTime = 1/fps
+#     dt = time.localtime() - startTime
+#     while(dt < frameTime):
+#         dt = time.localtime() - startTime
+#     return dt
 
 def mainLoop(send, receive):
     
     #------------------Main Game Loop------------------#
     while (state.status != "stopped"):
         startTime = time.localtime()
+
         # Get user input and update game state
-        userInput = getInput()
-        state.updateGameState("keyboard", userInput)
+        userInput = engine.input.getInput()
+        GameActions(userInput)
 
         # Get other networking player states and update game state
         networkData = receive()
         if networkData != "None":
-            state.updateGameState("network", networkData)
+            state.unpack(networkData)
 
         # Send current game state to other networking players
         send(state.pack())
@@ -73,7 +53,8 @@ def mainLoop(send, receive):
         engine.render()
 
         # Try to keep the game running at a constant FPS
-        dt = fpsControl(30, startTime)
+        # dt = fpsControl(30, startTime)
+        engine.clock.tick(30)
     #--------------------------------------------------#
     pygame.quit()
 
