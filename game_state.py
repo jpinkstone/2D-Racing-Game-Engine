@@ -5,35 +5,21 @@ class GameState:
     # Initialize the total amount of players in the form of a list
     def __init__(self,players = []):
         try:
+            self.title = "Tiny Turismo"
             self.players = players
             self.delimiter = "|"
             self.status = 1
             self.playerId = len(self.players) + 1
+            self.map = "assets/track.png"
+            self.mapMask = "assets/track_mask.png"
+            self.playerSprites = ["race_car_blue.png", "race_car_green.png", "race_car_pink.png", "race_car_red.png"]
+            self.screen = (1000, 800)
             print(vars(self))
         except:
             print("Initilization of Game State Failed.")
 
     def addPlayer(self,player):
         self.players.append(player)
-
-    def updateGameState(self, type, inputData):
-        if type == "keyboard":
-            if inputData == "stopped":
-                self.status = "stopped"
-            elif inputData == "acceleratingF":
-                self.players[self.playerId].acceleration = self.players[self.playerId].acceleration + 1
-            elif inputData == "deceleratingF":
-                self.players[self.playerId].acceleration = self.players[self.playerId].acceleration - 1
-            elif inputData == "acceleratingB":
-                self.players[self.playerId].acceleration = self.players[self.playerId].acceleration - 1
-            elif inputData == "deceleratingB":
-                self.players[self.playerId].acceleration = self.players[self.playerId].acceleration + 1
-            elif inputData == "left":
-                self.players[self.playerId].angle = self.players[self.playerId].angle - 5
-            elif inputData == "right":
-                self.players[self.playerId].angle = self.players[self.playerId].angle + 5
-        else:
-            self.unpack(inputData)
     
     def pack(self):
         encoded_data = ""
@@ -146,14 +132,14 @@ class CarAI(playerGameState):
         super().move()
 
 class GameActions():
-    def __init__(self): 
-        self.actions = {"accelF" : accelF, 
-                        "accelB" : accelB, 
-                        "decelF" : decelF, 
-                        "decelB" : decelB, 
-                        "left" : left, 
-                        "right" : right, 
-                        "stopped" : quit}
+    def __init__(self, action): 
+        if action == "accelF": self.accelF()
+        elif action == "accelB": self.accelB()
+        elif action == "decelF": self.decelF()
+        elif action == "decelB" : self.decelB()
+        elif action == "left": self.left()
+        elif action == "right": self.right()
+        elif action == "quit": self.quit()
 
     def accelF(self):
         pass
