@@ -144,6 +144,37 @@ class CarAI(playerGameState):
         self.calculate_angle()
         self.update_path_point()
         super().move()
+
+class GameActions():
+    def __init__(self): 
+        self.actions = {"accelF" : accelF, 
+                        "accelB" : accelB, 
+                        "decelF" : decelF, 
+                        "decelB" : decelB, 
+                        "left" : left, 
+                        "right" : right, 
+                        "stopped" : quit}
+
+    def accelF(self):
+        pass
+
+    def accelB(self):
+        pass
+
+    def decelF(self):
+        pass
+
+    def decelB(self):
+        pass
+
+    def left(self):
+        pass
+
+    def right(self):
+        pass
+
+    def quit(self):
+        pass
     
 # def test_encoding_decoding(game_state):
 #     before_encoding = []
