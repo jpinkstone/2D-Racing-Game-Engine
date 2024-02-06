@@ -7,9 +7,13 @@ import pygame
 from game_state import *
 
 class GameEngine():
-    def __init__(self):
+    def __init__(self, state):
         try:
-            pass
+            pygame.init()
+            self.screen = pygame.display.set_mode(state.screen)
+            self.screen.fill((255, 255, 255))
+            pygame.display.set_caption(state.title)
+            self.clock = pygame.time.Clock()
         except:
             print("Initilization of Game Engine Failed.")
     
@@ -127,8 +131,33 @@ class GameEngine():
                         
             s.close()
     
+    class input():
+        def __init__(self):
+            pass
+
+        def getInput(self):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return "quit"
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_w:
+                        return "accelF"
+                    if event.key == pygame.K_s:
+                        return "accelB"
+                    if event.key == pygame.K_a:
+                        return "left"
+                    if event.key == pygame.K_d:
+                        return "right"
+                    if event.key == pygame.K_q:
+                        return "quit"
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_w:
+                        return "decelF"
+                    if event.key == pygame.K_s:
+                        return "decelB"
+
     class render():
-        pass
+        pygame.display.flip()
 
     class audio():
         pass
