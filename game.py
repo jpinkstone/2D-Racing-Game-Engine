@@ -6,6 +6,7 @@
 
 from game_state import *
 from game_engine import *
+from game_support import *
 
 state = GameState()
 engine = GameEngine(state)
@@ -17,26 +18,12 @@ if isServer:
 else:
     Net = engine.networking("client", serverIp, 60217)
 
-def updateHUD():
-    pass
-
-# # uses the remainder of the frame time, returns the change in time
-# def fpsControl(fps, startTime):
-#     frameTime = 1/fps
-#     dt = time.localtime() - startTime
-#     while(dt < frameTime):
-#         dt = time.localtime() - startTime
-#     return dt
-
 def mainLoop(send, receive):
     
     #------------------Main Game Loop------------------#
     while (state.status != "stopped"):
-        startTime = time.localtime()
-
-        # Get user input and update game state
-        userInput = engine.input.getInput()
-        GameActions(userInput)
+        # Get user input
+        userData = getInput()
 
         # Get other networking player states and update game state
         networkData = receive()
@@ -46,14 +33,13 @@ def mainLoop(send, receive):
         # Send current game state to other networking players
         send(state.pack())
 
-        # Update the HUD from the game state
-        updateHUD()
+        # Update the game cycle
+        cycle(engine, state, userData)
 
         # Render the frame and do collisions and physics
         engine.render()
 
         # Try to keep the game running at a constant FPS
-        # dt = fpsControl(30, startTime)
         engine.clock.tick(30)
     #--------------------------------------------------#
     pygame.quit()
