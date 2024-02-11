@@ -1,6 +1,4 @@
-import pygame
-
-# Game specific functions
+from game_engine import *
 
 def getInput():
     for event in pygame.event.get():
@@ -38,22 +36,24 @@ def menu_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.screen.fill((200, 200, 200))
-    engine.screen.addText(state.dimensions[0]/2, state.dimensions[1]/2, state.title)
-    engine.screen.addText(state.dimensions[0]/2, state.dimensions[1]/3, "Press 'Enter' to begin game")
+    fill(engine, (200, 200, 200))
+    addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, state.title)
+    addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Press 'Enter' to begin game")
     if userData == "enter":
         state.cycle = "startup"
+    elif userData == "quit":
+        state.status = "stopped"
 
 def startup_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.screen.clear()
-    engine.screen.addMap()
-    engine.EngineActions.addPlayer()
-    engine.audio.startMusic()
-    engine.EngineActions.startGame()
-    state.cycle = "game"
+    clear(engine)
+    addMap(engine, "/assets/track.png")
+    # engine.EngineActions.addPlayer()
+    # engine.audio.startMusic()
+    # engine.EngineActions.startGame()
+    # engine.cycle = "game"
 
 def game_state(engine, state, userData):
     # Update game state
@@ -61,29 +61,29 @@ def game_state(engine, state, userData):
     # Add stuff to screen (Don't render. Happens in main loop)
     engine.GameActions(userData)
     engine.physics()
-    if state.timeLeft <= 0:
-        state.cycle = "done"
+    if engine.timeLeft <= 0:
+        engine.cycle = "done"
 
 def done_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.screen.clear()
-    engine.screen.fill((200, 200, 200))
-    engine.screen.addText(state.dimensions[0]/2, state.dimensions[1]/2, "Player " + state.firstPlace + " wins!")
-    engine.screen.addText(state.dimensions[0]/2, state.dimensions[1]/3, "Press 'q' to exit game")
-    engine.screen.addText(state.dimensions[0]/2, state.dimensions[1]/3, "Press 'r' to restart game")
+    engine.window.clear()
+    engine.window.fill((200, 200, 200))
+    engine.window.addText(engine.dimensions[0]/2, engine.dimensions[1]/2, "Player " + engine.firstPlace + " wins!")
+    engine.window.addText(engine.dimensions[0]/2, engine.dimensions[1]/3, "Press 'q' to exit game")
+    engine.window.addText(engine.dimensions[0]/2, engine.dimensions[1]/3, "Press 'r' to restart game")
     if userData == "quit":
-        state.status = "stopped"
+        engine.status = "stopped"
     elif userData == "r":
-        state.cycle = "startup"
+        engine.cycle = "startup"
 
 def quit_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.screen.clear()
-    engine.screen.fill((200, 200, 200))
-    engine.screen.addText(state.dimensions[0]/2, state.dimensions[1]/3, "Press 'q' to exit game")
+    engine.window.clear()
+    engine.window.fill((200, 200, 200))
+    engine.window.addText(engine.dimensions[0]/2, engine.dimensions[1]/3, "Press 'q' to exit game")
     if userData == "quit":
-        state.status = "stopped"
+        engine.status = "stopped"
