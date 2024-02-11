@@ -1,9 +1,9 @@
 class GameState:
     # Initialize the total amount of players in the form of a list
-    def __init__(self,players = []):
+    def __init__(self):
         try:
             self.title = "Tiny Turismo"
-            self.players = players
+            self.players = []
             self.delimiter = "|"
             self.status = "running"
             self.cycle = "menu"
@@ -12,7 +12,6 @@ class GameState:
             self.mapMask = "assets/track_mask.png"
             self.playerSprites = ["race_car_blue.png", "race_car_green.png", "race_car_pink.png", "race_car_red.png"]
             self.dimensions = (1000, 800)
-            print(vars(self))
         except:
             print("Initilization of Game State Failed.")
     
