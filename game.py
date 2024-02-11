@@ -8,41 +8,38 @@ from game_state import *
 from game_engine import *
 from game_support import *
 
-state = GameState()
-engine = GameEngine(state)
 isServer = True
 serverIp = "127.0.0.1"
+port = 60217
 
 if isServer:
-    Net = engine.networking("server", "127.0.0.1", 60217)
+    Net = networking("server", "127.0.0.1", port)
 else:
-    Net = engine.networking("client", serverIp, 60217)
+    Net = networking("client", serverIp, port)
 
 def mainLoop(send, receive):
+    pygame.init()
+    state = GameState()
+    engine = GameEngine(state)
     
     #------------------Main Game Loop------------------#
     while (state.status != "stopped"):
-        # Get user input
-        userData = getInput()
+        userData = getInput()             # Get user input
 
-        # Get other networking player states and update game state
-        networkData = receive()
-        if networkData != "None":
-            state.unpack(networkData)
+        # networkData = receive()         # Get other networking player states and update game state
+        # if networkData != "None":
+        #     state.unpack(networkData)
 
-        # Send current game state to other networking players
-        send(state.pack())
+        # send(state.pack())              # Send current game state to other networking players
 
-        # Update the game cycle
-        cycle(engine, state, userData)
+        cycle(engine, state, userData)    # Update the game cycle
 
-        # Render the frame and do collisions and physics
-        engine.render()
+        render()                          # Render the frame and do collisions and physics
 
-        # Try to keep the game running at a constant FPS
-        engine.clock.tick(30)
+        engine.clock.tick(30)             # Try to keep the game running at a constant FPS
     #--------------------------------------------------#
     pygame.quit()
+    sys.exit()
 
 if __name__ == '__main__':
     Net.start(mainLoop)
