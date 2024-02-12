@@ -6,17 +6,8 @@ import pygame
 import math
 import sys
 import os
-
-# Even constants
-EVENT_ACCELF = "accelF"
-EVENT_ACCELB = "accelB"
-EVENT_DECELF = "accelF"
-EVENT_DECELB = "accelB"
-EVENT_LEFT = "left"
-EVENT_RIGHT = "right"
-EVENT_RESTART = "restart"
-EVENT_ENTER = "enter"
-EVENT_QUIT = "quit"
+import datetime
+import signal
 
 from game_state import *
 
@@ -31,18 +22,17 @@ class GameEngine():
             print("Initilization of Game Engine Failed.")
 
 class EngineActions(GameEngine):
-    def __init__(self):
-        try:
-            # Add
-            pass
-        except:
-            print("Initilization of EngineActions Failed.")
-
-    def addPlayer(self,state, player):
+    def addPlayer(state, player):
         state.players.append(player)
     
-    def startGame(self):
-        pass
+    def setGameTime(state, seconds):
+        state.gameTime = seconds
+
+    def setLastTime(state, time):
+        state.lastTime = time
+    
+    def decreaseGameTime(state, num):
+        state.gameTime -= num
     
 class PlayerAI(GameEngine):
     def __init__(self, max_vel, rotation_vel, path=[]):
@@ -106,6 +96,7 @@ class networking():
             self.port = port
             self.sendQ = queue.Queue()
             self.receiveQ = queue.Queue()
+            self.status = "running"
         except:
             print("Initilization of networking Failed.")
 
@@ -118,6 +109,11 @@ class networking():
         main = threading.Thread(target=gameLoop, args=(self.send, self.receive))
         network.start()
         main.start()
+        main.join()
+        sys.exit()
+
+    def end(self):
+        self.status = "stopped"
     
     # Send data to all connected devices
     def send(self, data):
@@ -136,6 +132,9 @@ class networking():
         s.connect((self.host, self.port))
 
         while True:
+            if self.status == "stopped":
+                print("Exiting")
+                break
             if self.sendQ.qsize():
                 s.sendall(self.sendQ.get().encode())
             try:
@@ -163,6 +162,8 @@ class networking():
         exit_flag = False
 
         while True:
+            if self.status == "stopped":
+                exit_flag = True
             read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list, 0)
             for notified_socket in read_sockets:
                 # New connection
@@ -211,16 +212,17 @@ class networking():
                     
         s.close()
 
-class GameActions(GameEngine):
-    def __init__(self, action):
+class GameActions():
+    def __init__(self, state, action):
         try:
-            if action == EVENT_ACCELF: self.accelF()
-            elif action == EVENT_ACCELB: self.accelB()
-            elif action == EVENT_DECELF: self.decelF()
-            elif action == EVENT_DECELB : self.decelB()
-            elif action == EVENT_LEFT: self.left()
-            elif action == EVENT_RIGHT: self.right()
-            elif action == EVENT_QUIT: self.quit()
+            self.state = state
+            if action == "accelF": self.accelF()
+            elif action == "accelB": self.accelB()
+            elif action == "decelF": self.decelF()
+            elif action == "decelB" : self.decelB()
+            elif action == "left": self.left()
+            elif action == "right": self.right()
+            elif action == "quit": self.quit()
         except:
             print("Initilization of GameActions Failed.")
 
@@ -243,7 +245,7 @@ class GameActions(GameEngine):
         pass
 
     def quit(self):
-        super().state.cycle = "quit"
+        self.state.cycle = "quit"
 
 def render():
     pygame.display.update()
