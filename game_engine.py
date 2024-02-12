@@ -226,12 +226,11 @@ class networking():
                     
         s.close()
 
-class GameActions(GameEngine):
-    def __init__(self, actions):
+class GameActions():
+    def __init__(self, state, actions):
         try:
-            self.state = None
+            self.state = state
             self.actions = actions
-            self.handle_actions()
         except:
             print("Initialization of GameActions Failed.")
 
@@ -307,10 +306,11 @@ def addText(engine, x_dim, y_dim, font, size, text):
     rect.center = (x_dim, y_dim)
     engine.screen.blit(text, rect)
 
-def addMap(engine, image):
+def addMap(engine, image, dimensions):
     dir = os.getcwd()
     img = pygame.image.load(dir + image).convert()
-    engine.screen.blit(img, (0, 0))
+    scaled = pygame.transform.scale(img, dimensions)
+    engine.screen.blit(scaled, (0, 0))
 
 class audio(GameEngine):
     def startMusic():
