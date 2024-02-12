@@ -9,9 +9,15 @@ import os
 import datetime
 import signal
 
-ACCELERATION_FACTOR = 1
-DECELERATION_FACTOR = 0.9
-ROTATION_INCREMENT = 10
+EVENT_ACCELF = "accelF"
+EVENT_ACCELB = "accelB"
+EVENT_DECELF = "accelF"
+EVENT_DECELB = "accelB"
+EVENT_LEFT = "left"
+EVENT_RIGHT = "right"
+EVENT_RESTART = "restart"
+EVENT_ENTER = "enter"
+EVENT_QUIT = "quit"
 
 ACCELERATION_FACTOR = 1
 DECELERATION_FACTOR = 0.9
@@ -220,35 +226,12 @@ class networking():
                     
         s.close()
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-class GameActions():
-    def __init__(self, state, action):
-        try:
-            self.state = state
-            if action == "accelF": self.accelF()
-            elif action == "accelB": self.accelB()
-            elif action == "decelF": self.decelF()
-            elif action == "decelB" : self.decelB()
-            elif action == "left": self.left()
-            elif action == "right": self.right()
-            elif action == "quit": self.quit()
-=======
 class GameActions(GameEngine):
     def __init__(self, actions):
         try:
             self.state = None
             self.actions = actions
             self.handle_actions()
->>>>>>> Stashed changes
-=======
-class GameActions(GameEngine):
-    def __init__(self, actions):
-        try:
-            self.state = None
-            self.actions = actions
-            self.handle_actions()
->>>>>>> Stashed changes
         except:
             print("Initialization of GameActions Failed.")
 
