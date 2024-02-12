@@ -11,7 +11,7 @@ class GameState:
             self.map = "assets/track.png"
             self.mapMask = "assets/track_mask.png"
             self.playerSprites = ["race_car_blue.png", "race_car_green.png", "race_car_pink.png", "race_car_red.png"]
-            self.dimensions = (1000, 800)
+            self.dimensions = (1920*0.75, 1080*0.75)
             self.gameTime = None
             self.lastTime = None
         except:
