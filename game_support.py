@@ -39,6 +39,7 @@ def menu_state(engine, state, userData):
     fill(engine, (200, 200, 200))
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, state.title)
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Press 'Enter' to begin game")
+    addText(engine, state.dimensions[0]/2, state.dimensions[1]/4, 'freesansbold.ttf', 32, "Currently connected peer players: " + str(len(state.players)))
     if userData == "enter":
         state.cycle = "startup"
     elif userData == "quit":
