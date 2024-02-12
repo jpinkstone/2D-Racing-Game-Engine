@@ -27,8 +27,8 @@ class EngineActions(GameEngine):
         except:
             print("Initilization of EngineActions Failed.")
 
-    def addPlayer(self, player):
-        GameState.players.append(player)
+    def addPlayer(self,state, player):
+        state.players.append(player)
     
     def startGame(self):
         pass
