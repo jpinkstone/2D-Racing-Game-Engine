@@ -3,27 +3,27 @@ from game_engine import *
 def getInput():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return "quit"
+            return EVENT_QUIT
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                return "accelF"
+                return EVENT_ACCELF
             if event.key == pygame.K_s:
-                return "accelB"
+                return EVENT_ACCELB
             if event.key == pygame.K_a:
-                return "left"
+                return EVENT_LEFT
             if event.key == pygame.K_d:
-                return "right"
+                return EVENT_RIGHT
             if event.key == pygame.K_r:
-                return "restart"
+                return EVENT_RESTART
             if event.key == pygame.K_RETURN:
-                return "enter"
+                return EVENT_ENTER
             if event.key == pygame.K_q:
-                return "quit"
+                return EVENT_QUIT
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
-                return "decelF"
+                return EVENT_DECELF
             if event.key == pygame.K_s:
-                return "decelB"
+                return EVENT_DECELB
             
 def cycle(engine, state, userData):
     if state.cycle == "menu": menu_state(engine, state, userData)
@@ -63,7 +63,8 @@ def game_state(engine, state, userData):
     # Add stuff to screen (Don't render. Happens in main loop)
     clear(engine)
     addMap(engine, "/assets/track.png", state.dimensions)
-    GameActions(state, userData)
+    addPlayer(engine, state.players[0])
+    GameActions().handle_actions(state, userData)
     addText(engine, state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
     if int(datetime.datetime.today().timestamp()) > state.lastTime:
         EngineActions.setLastTime(state, int(datetime.datetime.today().timestamp()))

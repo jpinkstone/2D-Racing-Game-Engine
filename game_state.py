@@ -62,12 +62,11 @@ class PlayerGameState:
         self.player_y = 50
         self.player_speed = 1
         self.player_max_speed = 5  # Increased max speed
-        self.acceleration = 1.0  # Increased acceleration
         self.deceleration_factor = 0.2
         self.player_velocity = [0, 0]
         self.player_angle = 0  # Initial angle in degrees
-        self.accelerating = False  # Flag to track if accelerating
-        self.decelerating = False  # Flag to track if decelerating
+        self.acceleration = 2
         self.player_velocity[0] = 0
         self.player_velocity[1] = 0
         self.score = 0
+        self.sprite_id = 0

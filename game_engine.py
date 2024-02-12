@@ -19,7 +19,7 @@ EVENT_RESTART = "restart"
 EVENT_ENTER = "enter"
 EVENT_QUIT = "quit"
 
-ACCELERATION_FACTOR = 1
+ACCELERATION_FACTOR = 0.5
 DECELERATION_FACTOR = 0.9
 ROTATION_INCREMENT = 10
 
@@ -227,35 +227,27 @@ class networking():
         s.close()
 
 class GameActions():
-    def __init__(self, state, actions):
-        try:
-            self.state = state
-            self.actions = actions
-        except:
-            print("Initialization of GameActions Failed.")
+    def handle_actions(self, state, action):
+        if action == EVENT_ACCELF:
+            self.accelerate(state, ACCELERATION_FACTOR)
+        elif action == EVENT_ACCELB:
+            self.accelerate(state, -ACCELERATION_FACTOR)
+        elif action == EVENT_DECELF:
+            self.decelerate(state, DECELERATION_FACTOR)
+        elif action == EVENT_DECELB:
+            self.decelerate(state, -DECELERATION_FACTOR)
+        elif action == EVENT_LEFT:
+            self.rotate(state, -ROTATION_INCREMENT)
+        elif action == EVENT_RIGHT:
+            self.rotate(state, ROTATION_INCREMENT)
+        elif action == EVENT_QUIT:
+            self.quit(state)
 
-    def handle_actions(self):
-        for action in self.actions:
-            if action == EVENT_ACCELF:
-                self.accelerate(ACCELERATION_FACTOR)
-            elif action == EVENT_ACCELB:
-                self.accelerate(-ACCELERATION_FACTOR)
-            elif action == EVENT_DECELF:
-                self.decelerate(DECELERATION_FACTOR)
-            elif action == EVENT_DECELB:
-                self.decelerate(-DECELERATION_FACTOR)
-            elif action == EVENT_LEFT:
-                self.rotate(-ROTATION_INCREMENT)
-            elif action == EVENT_RIGHT:
-                self.rotate(ROTATION_INCREMENT)
-            elif action == EVENT_QUIT:
-                self.quit()
-
-    def accelerate(self, direction):
-        temp_player = self.state.players[0]
+    def accelerate(self, state, direction):
+        temp_player = state.players[0]
 
         # Adjusting speed
-        temp_player.player_speed += self.acceleration
+        temp_player.player_speed += temp_player.acceleration
         temp_player.player_speed = min(temp_player.player_speed, temp_player.player_max_speed)
 
         # Calculate velocity
@@ -266,23 +258,25 @@ class GameActions():
         temp_player.player_x += temp_player.player_velocity[0]
         temp_player.player_y += temp_player.player_velocity[1]
 
-        self.state.players[0] = temp_player
+        state.players[0] = temp_player
 
-    def decelerate(self, factor):
-        temp_player = self.state.players[0]
+    def decelerate(self, state, factor):
+        temp_player = state.players[0]
 
         temp_player.player_velocity[0] *= factor
         temp_player.player_velocity[1] *= factor
         temp_player.player_x += temp_player.player_velocity[0]
         temp_player.player_y += temp_player.player_velocity[1]
 
-        self.state.players[0] = temp_player
+        state.players[0] = temp_player
 
-    def rotate(self, angle_increment):
-        self.state.players[0] += angle_increment
+    def rotate(self, state, angle_increment):
+        temp_player = state.players[0]
+        temp_player.player_angle += angle_increment
+        state.players[0] = temp_player
 
-    def quit(self):
-        self.state.cycle = "quit"
+    def quit(self, state):
+        state.cycle = "quit"
 
 def render():
     pygame.display.update()
@@ -311,6 +305,11 @@ def addMap(engine, image, dimensions):
     img = pygame.image.load(dir + image).convert()
     scaled = pygame.transform.scale(img, dimensions)
     engine.screen.blit(scaled, (0, 0))
+
+def addPlayer(engine, player):
+    dir = os.getcwd() 
+    img = pygame.image.load(dir + "/assets/race_car" + str(player.sprite_id) + ".png").convert_alpha()
+    engine.screen.blit(img, (player.player_x, player.player_y))
 
 class audio(GameEngine):
     def startMusic():
