@@ -7,6 +7,17 @@ import math
 import sys
 import os
 
+# Even constants
+EVENT_ACCELF = "accelF"
+EVENT_ACCELB = "accelB"
+EVENT_DECELF = "accelF"
+EVENT_DECELB = "accelB"
+EVENT_LEFT = "left"
+EVENT_RIGHT = "right"
+EVENT_RESTART = "restart"
+EVENT_ENTER = "enter"
+EVENT_QUIT = "quit"
+
 from game_state import *
 
 class GameEngine():
@@ -203,13 +214,13 @@ class networking():
 class GameActions(GameEngine):
     def __init__(self, action):
         try:
-            if action == "accelF": self.accelF()
-            elif action == "accelB": self.accelB()
-            elif action == "decelF": self.decelF()
-            elif action == "decelB" : self.decelB()
-            elif action == "left": self.left()
-            elif action == "right": self.right()
-            elif action == "quit": self.quit()
+            if action == EVENT_ACCELF: self.accelF()
+            elif action == EVENT_ACCELB: self.accelB()
+            elif action == EVENT_DECELF: self.decelF()
+            elif action == EVENT_DECELB : self.decelB()
+            elif action == EVENT_LEFT: self.left()
+            elif action == EVENT_RIGHT: self.right()
+            elif action == EVENT_QUIT: self.quit()
         except:
             print("Initilization of GameActions Failed.")
 
