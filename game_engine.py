@@ -9,6 +9,10 @@ import os
 import datetime
 import signal
 
+ACCELERATION_FACTOR = 1
+DECELERATION_FACTOR = 0.9
+ROTATION_INCREMENT = 10
+
 from game_state import *
 
 class GameEngine():
@@ -212,6 +216,7 @@ class networking():
                     
         s.close()
 
+<<<<<<< Updated upstream
 class GameActions():
     def __init__(self, state, action):
         try:
@@ -223,26 +228,63 @@ class GameActions():
             elif action == "left": self.left()
             elif action == "right": self.right()
             elif action == "quit": self.quit()
+=======
+class GameActions(GameEngine):
+    def __init__(self, actions):
+        try:
+            self.state = None
+            self.actions = actions
+            self.handle_actions()
+>>>>>>> Stashed changes
         except:
-            print("Initilization of GameActions Failed.")
+            print("Initialization of GameActions Failed.")
 
-    def accelF(self):
-        pass
+    def handle_actions(self):
+        for action in self.actions:
+            if action == EVENT_ACCELF:
+                self.accelerate(ACCELERATION_FACTOR)
+            elif action == EVENT_ACCELB:
+                self.accelerate(-ACCELERATION_FACTOR)
+            elif action == EVENT_DECELF:
+                self.decelerate(DECELERATION_FACTOR)
+            elif action == EVENT_DECELB:
+                self.decelerate(-DECELERATION_FACTOR)
+            elif action == EVENT_LEFT:
+                self.rotate(-ROTATION_INCREMENT)
+            elif action == EVENT_RIGHT:
+                self.rotate(ROTATION_INCREMENT)
+            elif action == EVENT_QUIT:
+                self.quit()
 
-    def accelB(self):
-        pass
+    def accelerate(self, direction):
+        temp_player = self.state.players[0]
 
-    def decelF(self):
-        pass
+        # Adjusting speed
+        temp_player.player_speed += self.acceleration
+        temp_player.player_speed = min(temp_player.player_speed, temp_player.player_max_speed)
 
-    def decelB(self):
-        pass
+        # Calculate velocity
+        temp_player.player_velocity[0] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).x
+        temp_player.player_velocity[1] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).y
+        
+        # Change coordinates
+        temp_player.player_x += temp_player.player_velocity[0]
+        temp_player.player_y += temp_player.player_velocity[1]
 
-    def left(self):
-        pass
+        self.state.players[0] = temp_player
 
-    def right(self):
-        pass
+    def decelerate(self, factor):
+        temp_player = self.state.players[0]
+
+        temp_player.player_velocity[0] *= factor
+        temp_player.player_velocity[1] *= factor
+        temp_player.player_x += temp_player.player_velocity[0]
+        temp_player.player_y += temp_player.player_velocity[1]
+
+        self.state.players[0] = temp_player
+
+    def rotate(self, angle_increment):
+        self.state.players[0] += angle_increment
 
     def quit(self):
         self.state.cycle = "quit"
