@@ -13,6 +13,10 @@ ACCELERATION_FACTOR = 1
 DECELERATION_FACTOR = 0.9
 ROTATION_INCREMENT = 10
 
+ACCELERATION_FACTOR = 1
+DECELERATION_FACTOR = 0.9
+ROTATION_INCREMENT = 10
+
 from game_state import *
 
 class GameEngine():
@@ -217,6 +221,7 @@ class networking():
         s.close()
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 class GameActions():
     def __init__(self, state, action):
         try:
@@ -228,6 +233,14 @@ class GameActions():
             elif action == "left": self.left()
             elif action == "right": self.right()
             elif action == "quit": self.quit()
+=======
+class GameActions(GameEngine):
+    def __init__(self, actions):
+        try:
+            self.state = None
+            self.actions = actions
+            self.handle_actions()
+>>>>>>> Stashed changes
 =======
 class GameActions(GameEngine):
     def __init__(self, actions):
