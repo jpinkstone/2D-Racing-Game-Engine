@@ -62,7 +62,7 @@ def game_state(engine, state, userData):
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
     clear(engine)
-    addMap(engine, "/assets/track.png")
+    addMap(engine, "/assets/track.png", state.dimensions)
     GameActions(state, userData)
     addText(engine, state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
     if int(datetime.datetime.today().timestamp()) > state.lastTime:
