@@ -3,28 +3,27 @@ from game_engine import *
 def getInput():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return EVENT_QUIT
+            return "quit"
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                return EVENT_ACCELF
+                return "accelF"
             if event.key == pygame.K_s:
-                return EVENT_ACCELB
+                return "accelB"
             if event.key == pygame.K_a:
-                return EVENT_LEFT
+                return "left"
             if event.key == pygame.K_d:
-                return EVENT_RIGHT
+                return "right"
             if event.key == pygame.K_r:
-                return EVENT_RESTART
+                return "restart"
             if event.key == pygame.K_RETURN:
-                return EVENT_ENTER
+                return "enter"
             if event.key == pygame.K_q:
-                return EVENT_QUIT
+                return "quit"
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
-                return EVENT_DECELF
+                return "decelF"
             if event.key == pygame.K_s:
-                return EVENT_DECELB
-            
+                return "decelB"
             
 def cycle(engine, state, userData):
     if state.cycle == "menu": menu_state(engine, state, userData)
@@ -51,42 +50,49 @@ def startup_state(engine, state, userData):
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
     clear(engine)
-    addMap(engine, "/assets/track.png")
     player = PlayerGameState(state.playerId+1,500,500)
-    EngineActions.addPlayer(EngineActions, state, player)
-    # engine.audio.startMusic()
-    # engine.EngineActions.startGame()
-    # engine.cycle = "game"
+    EngineActions.addPlayer(state, player)
+    audio.startMusic()
+    EngineActions.setGameTime(state, 180)
+    EngineActions.setLastTime(state, int(datetime.datetime.today().timestamp()))
+    state.cycle = "game"
 
 def game_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.GameActions(userData)
-    engine.physics()
-    if engine.timeLeft <= 0:
-        engine.cycle = "done"
+    clear(engine)
+    addMap(engine, "/assets/track.png")
+    GameActions(state, userData)
+    addText(engine, state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
+    if int(datetime.datetime.today().timestamp()) > state.lastTime:
+        EngineActions.setLastTime(state, int(datetime.datetime.today().timestamp()))
+        EngineActions.decreaseGameTime(state, 1)
+    if state.gameTime <= 0:
+        state.cycle = "done"
+    if userData == "quit":
+        state.status = "stopped"
 
 def done_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.window.clear()
-    engine.window.fill((200, 200, 200))
-    engine.window.addText(engine.dimensions[0]/2, engine.dimensions[1]/2, "Player " + engine.firstPlace + " wins!")
-    engine.window.addText(engine.dimensions[0]/2, engine.dimensions[1]/3, "Press 'q' to exit game")
-    engine.window.addText(engine.dimensions[0]/2, engine.dimensions[1]/3, "Press 'r' to restart game")
+    clear()
+    fill((200, 200, 200))
+    addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Player " + state.firstPlace + " wins!")
+    addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
+    addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'r' to restart game")
     if userData == "quit":
-        engine.status = "stopped"
+        state.status = "stopped"
     elif userData == "r":
-        engine.cycle = "startup"
+        state.cycle = "startup"
 
 def quit_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.window.clear()
-    engine.window.fill((200, 200, 200))
-    engine.window.addText(engine.dimensions[0]/2, engine.dimensions[1]/3, "Press 'q' to exit game")
+    clear()
+    fill((200, 200, 200))
+    addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
     if userData == "quit":
-        engine.status = "stopped"
+        state.status = "stopped"
