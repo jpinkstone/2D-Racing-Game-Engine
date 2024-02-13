@@ -11,7 +11,6 @@ class GameState:
             self.cycle = "menu"
             self.isServer = isServer
             self.playerId = uuid.UUID(int=uuid.getnode())
-            print(self.playerId)
             self.map = "assets/track.png"
             self.mapMask = "assets/track_mask.png"
             self.playerSprites = ["race_car_blue.png", "race_car_green.png", "race_car_pink.png", "race_car_red.png"]
