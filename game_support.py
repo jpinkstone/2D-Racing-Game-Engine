@@ -4,26 +4,27 @@ def getInput():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             return EVENT_QUIT
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                return EVENT_ACCELF
-            if event.key == pygame.K_s:
-                return EVENT_ACCELB
-            if event.key == pygame.K_a:
-                return EVENT_LEFT
-            if event.key == pygame.K_d:
-                return EVENT_RIGHT
-            if event.key == pygame.K_r:
-                return EVENT_RESTART
-            if event.key == pygame.K_RETURN:
-                return EVENT_ENTER
-            if event.key == pygame.K_q:
-                return EVENT_QUIT
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
                 return EVENT_DECELF
             if event.key == pygame.K_s:
                 return EVENT_DECELB
+    
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]:
+        return EVENT_ACCELF
+    if keys[pygame.K_s]:
+        return EVENT_ACCELB
+    if keys[pygame.K_a]:
+        return EVENT_LEFT
+    if keys[pygame.K_d]:
+        return EVENT_RIGHT
+    if keys[pygame.K_r]:
+        return EVENT_RESTART
+    if keys[pygame.K_RETURN]:
+        return EVENT_ENTER
+    if keys[pygame.K_q]:
+        return EVENT_QUIT
             
 def cycle(engine, state, userData):
     if state.cycle == "menu": menu_state(engine, state, userData)
