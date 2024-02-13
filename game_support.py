@@ -63,7 +63,7 @@ def game_state(engine, state, userData):
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
     clear(engine)
-    addMap(engine, "/assets/track.png", state.dimensions)
+    addMap(engine, "track.png", state.dimensions)
     addPlayer(engine, state.players[0])
     GameActions().handle_actions(state, userData)
     addText(engine, state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
