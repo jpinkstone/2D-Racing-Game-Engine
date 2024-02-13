@@ -51,7 +51,7 @@ def startup_state(engine, state, userData):
     # Add stuff to screen (Don't render. Happens in main loop)
     clear(engine)
     addMap(engine, "/assets/track.png")
-    player = PlayerGameState(state.playerId+1,500,500)
+    player = PlayerGameState(state.playerId,500,500)
     EngineActions.addPlayer(EngineActions, state, player)
     # engine.audio.startMusic()
     # engine.EngineActions.startGame()

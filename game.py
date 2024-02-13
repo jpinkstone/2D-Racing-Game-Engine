@@ -19,18 +19,19 @@ else:
 
 def mainLoop(send, receive):
     pygame.init()
-    state = GameState()
+    state = GameState(isServer)
     engine = GameEngine(state)
     
     #------------------Main Game Loop------------------#
     while (state.status != "stopped"):
         userData = getInput()             # Get user input
 
-        # networkData = receive()         # Get other networking player states and update game state
-        # if networkData != "None":
-        #     state.unpack(networkData)
+        networkData = str(receive())      # Get other networking player states and update game state
+        
+        if networkData != "None":
+            state.unpack(networkData)
 
-        # send(state.pack())              # Send current game state to other networking players
+        send(state.pack())              # Send current game state to other networking players
 
         cycle(engine, state, userData)    # Update the game cycle
 

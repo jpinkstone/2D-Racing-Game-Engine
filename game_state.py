@@ -1,13 +1,17 @@
+import uuid
+
 class GameState:
     # Initialize the total amount of players in the form of a list
-    def __init__(self):
+    def __init__(self, isServer):
         try:
             self.title = "Tiny Turismo"
             self.players = []
             self.delimiter = "|"
             self.status = "running"
             self.cycle = "menu"
-            self.playerId = len(self.players) + 1
+            self.isServer = isServer
+            self.playerId = uuid.UUID(int=uuid.getnode())
+            print(self.playerId)
             self.map = "assets/track.png"
             self.mapMask = "assets/track_mask.png"
             self.playerSprites = ["race_car_blue.png", "race_car_green.png", "race_car_pink.png", "race_car_red.png"]
@@ -21,7 +25,7 @@ class GameState:
         game_state_vars = vars(self)
 
         for key in game_state_vars.keys():
-            if key == 'players' or key == 'delimiter': continue
+            if key != 'status': continue
             encoded_data += str(game_state_vars[key]) + self.delimiter
         
         for i in range(len(self.players)):
@@ -36,6 +40,7 @@ class GameState:
         decoded_data = encoded_data.split(self.delimiter)
         game_state_vars = vars(self)
         print(game_state_vars)
+        print(decoded_data)
         j = 0
         for key in game_state_vars.keys():
             if key == 'players' or key == 'delimiter': continue
