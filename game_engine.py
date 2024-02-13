@@ -7,12 +7,11 @@ import math
 import sys
 import os
 import datetime
-import signal
 
 EVENT_ACCELF = "accelF"
 EVENT_ACCELB = "accelB"
-EVENT_DECELF = "accelF"
-EVENT_DECELB = "accelB"
+EVENT_DECELF = "decelF"
+EVENT_DECELB = "decelB"
 EVENT_LEFT = "left"
 EVENT_RIGHT = "right"
 EVENT_RESTART = "restart"
@@ -301,14 +300,12 @@ def addText(engine, x_dim, y_dim, font, size, text):
     engine.screen.blit(text, rect)
 
 def addMap(engine, image, dimensions):
-    dir = os.getcwd()
-    img = pygame.image.load(dir + image).convert()
+    img = pygame.image.load(os.path.join("assets", image)).convert()
     scaled = pygame.transform.scale(img, dimensions)
     engine.screen.blit(scaled, (0, 0))
 
 def addPlayer(engine, player):
-    dir = os.getcwd() 
-    img = pygame.image.load(dir + "/assets/race_car" + str(player.sprite_id) + ".png").convert_alpha()
+    img = pygame.image.load(os.path.join("assets", "race_car" + str(player.sprite_id) + ".png")).convert_alpha()
     engine.screen.blit(img, (player.player_x, player.player_y))
 
 class audio(GameEngine):
