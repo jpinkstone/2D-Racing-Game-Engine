@@ -36,7 +36,7 @@ class GameEngine():
             print("Initilization of Game Engine Failed.")
 
 class EngineActions(GameEngine):
-    def addPlayer(self,state, player):
+    def addPlayer(state, player):
         state.players.append(player)
     
     def setGameTime(state, seconds):
