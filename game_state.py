@@ -14,7 +14,9 @@ class GameState:
             self.map = "assets/track.png"
             self.mapMask = "assets/track_mask.png"
             self.playerSprites = ["race_car_blue.png", "race_car_green.png", "race_car_pink.png", "race_car_red.png"]
-            self.dimensions = (1000, 800)
+            self.dimensions = (1920*0.75, 1080*0.75)
+            self.gameTime = None
+            self.lastTime = None
         except:
             print("Initilization of Game State Failed.")
     
@@ -64,12 +66,11 @@ class PlayerGameState:
         self.player_y = 50
         self.player_speed = 1
         self.player_max_speed = 5  # Increased max speed
-        self.acceleration = 1.0  # Increased acceleration
         self.deceleration_factor = 0.2
         self.player_velocity = [0, 0]
         self.player_angle = 0  # Initial angle in degrees
-        self.accelerating = False  # Flag to track if accelerating
-        self.decelerating = False  # Flag to track if decelerating
+        self.acceleration = 2
         self.player_velocity[0] = 0
         self.player_velocity[1] = 0
         self.score = 0
+        self.sprite_id = 0

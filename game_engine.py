@@ -6,6 +6,22 @@ import pygame
 import math
 import sys
 import os
+import datetime
+import signal
+
+EVENT_ACCELF = "accelF"
+EVENT_ACCELB = "accelB"
+EVENT_DECELF = "accelF"
+EVENT_DECELB = "accelB"
+EVENT_LEFT = "left"
+EVENT_RIGHT = "right"
+EVENT_RESTART = "restart"
+EVENT_ENTER = "enter"
+EVENT_QUIT = "quit"
+
+ACCELERATION_FACTOR = 0.5
+DECELERATION_FACTOR = 0.9
+ROTATION_INCREMENT = 10
 
 from game_state import *
 
@@ -20,18 +36,17 @@ class GameEngine():
             print("Initilization of Game Engine Failed.")
 
 class EngineActions(GameEngine):
-    def __init__(self):
-        try:
-            # Add
-            pass
-        except:
-            print("Initilization of EngineActions Failed.")
-
-    def addPlayer(self, state, player):
+    def addPlayer(self,state, player):
         state.players.append(player)
     
-    def startGame(self):
-        pass
+    def setGameTime(state, seconds):
+        state.gameTime = seconds
+
+    def setLastTime(state, time):
+        state.lastTime = time
+    
+    def decreaseGameTime(state, num):
+        state.gameTime -= num
     
 class PlayerAI(GameEngine):
     def __init__(self, max_vel, rotation_vel, path=[]):
@@ -95,6 +110,7 @@ class networking():
             self.port = port
             self.sendQ = queue.Queue()
             self.receiveQ = queue.Queue()
+            self.status = "running"
         except:
             print("Initilization of networking Failed.")
 
@@ -107,6 +123,11 @@ class networking():
         main = threading.Thread(target=gameLoop, args=(self.send, self.receive))
         network.start()
         main.start()
+        main.join()
+        sys.exit()
+
+    def end(self):
+        self.status = "stopped"
     
     # Send data to all connected devices
     def send(self, data):
@@ -125,6 +146,9 @@ class networking():
         s.connect((self.host, self.port))
 
         while True:
+            if self.status == "stopped":
+                print("Exiting")
+                break
             if self.sendQ.qsize():
                 s.sendall(self.sendQ.get().encode())
             try:
@@ -152,6 +176,8 @@ class networking():
         exit_flag = False
 
         while True:
+            if self.status == "stopped":
+                exit_flag = True
             read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list, 0)
             for notified_socket in read_sockets:
                 # New connection
@@ -200,39 +226,57 @@ class networking():
                     
         s.close()
 
-class GameActions(GameEngine):
-    def __init__(self, action):
-        try:
-            if action == "accelF": self.accelF()
-            elif action == "accelB": self.accelB()
-            elif action == "decelF": self.decelF()
-            elif action == "decelB" : self.decelB()
-            elif action == "left": self.left()
-            elif action == "right": self.right()
-            elif action == "quit": self.quit()
-        except:
-            print("Initilization of GameActions Failed.")
+class GameActions():
+    def handle_actions(self, state, action):
+        if action == EVENT_ACCELF:
+            self.accelerate(state, ACCELERATION_FACTOR)
+        elif action == EVENT_ACCELB:
+            self.accelerate(state, -ACCELERATION_FACTOR)
+        elif action == EVENT_DECELF:
+            self.decelerate(state, DECELERATION_FACTOR)
+        elif action == EVENT_DECELB:
+            self.decelerate(state, -DECELERATION_FACTOR)
+        elif action == EVENT_LEFT:
+            self.rotate(state, -ROTATION_INCREMENT)
+        elif action == EVENT_RIGHT:
+            self.rotate(state, ROTATION_INCREMENT)
+        elif action == EVENT_QUIT:
+            self.quit(state)
 
-    def accelF(self):
-        pass
+    def accelerate(self, state, direction):
+        temp_player = state.players[0]
 
-    def accelB(self):
-        pass
+        # Adjusting speed
+        temp_player.player_speed += temp_player.acceleration
+        temp_player.player_speed = min(temp_player.player_speed, temp_player.player_max_speed)
 
-    def decelF(self):
-        pass
+        # Calculate velocity
+        temp_player.player_velocity[0] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).x
+        temp_player.player_velocity[1] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).y
+        
+        # Change coordinates
+        temp_player.player_x += temp_player.player_velocity[0]
+        temp_player.player_y += temp_player.player_velocity[1]
 
-    def decelB(self):
-        pass
+        state.players[0] = temp_player
 
-    def left(self):
-        pass
+    def decelerate(self, state, factor):
+        temp_player = state.players[0]
 
-    def right(self):
-        pass
+        temp_player.player_velocity[0] *= factor
+        temp_player.player_velocity[1] *= factor
+        temp_player.player_x += temp_player.player_velocity[0]
+        temp_player.player_y += temp_player.player_velocity[1]
 
-    def quit(self):
-        super().state.cycle = "quit"
+        state.players[0] = temp_player
+
+    def rotate(self, state, angle_increment):
+        temp_player = state.players[0]
+        temp_player.player_angle += angle_increment
+        state.players[0] = temp_player
+
+    def quit(self, state):
+        state.cycle = "quit"
 
 def render():
     pygame.display.update()
@@ -256,10 +300,16 @@ def addText(engine, x_dim, y_dim, font, size, text):
     rect.center = (x_dim, y_dim)
     engine.screen.blit(text, rect)
 
-def addMap(engine, image):
+def addMap(engine, image, dimensions):
     dir = os.getcwd()
     img = pygame.image.load(dir + image).convert()
-    engine.screen.blit(img, (0, 0))
+    scaled = pygame.transform.scale(img, dimensions)
+    engine.screen.blit(scaled, (0, 0))
+
+def addPlayer(engine, player):
+    dir = os.getcwd() 
+    img = pygame.image.load(dir + "/assets/race_car" + str(player.sprite_id) + ".png").convert_alpha()
+    engine.screen.blit(img, (player.player_x, player.player_y))
 
 class audio(GameEngine):
     def startMusic():

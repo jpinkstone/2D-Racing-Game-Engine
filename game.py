@@ -26,12 +26,11 @@ def mainLoop(send, receive):
     while (state.status != "stopped"):
         userData = getInput()             # Get user input
 
-        networkData = str(receive())      # Get other networking player states and update game state
-        
-        if networkData != "None":
-            state.unpack(networkData)
+        # networkData = receive()         # Get other networking player states and update game state
+        # if networkData != "None":
+        #     state.unpack(networkData)
 
-        send(state.pack())              # Send current game state to other networking players
+        # send(state.pack())              # Send current game state to other networking players
 
         cycle(engine, state, userData)    # Update the game cycle
 
@@ -40,7 +39,7 @@ def mainLoop(send, receive):
         engine.clock.tick(30)             # Try to keep the game running at a constant FPS
     #--------------------------------------------------#
     pygame.quit()
-    sys.exit()
+    Net.end()
 
 if __name__ == '__main__':
     Net.start(mainLoop)
