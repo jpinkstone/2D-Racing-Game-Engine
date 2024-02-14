@@ -41,10 +41,10 @@ def menu_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    fill(engine, (200, 200, 200))
-    addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, state.title)
-    addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Press 'Enter' to begin game")
-    addText(engine, state.dimensions[0]/2, state.dimensions[1]/4, 'freesansbold.ttf', 32, "Currently connected peer players: " + str(len(state.players)))
+    engine.fill(engine, (200, 200, 200))
+    engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, state.title)
+    engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Press 'Enter' to begin game")
+    engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/4, 'freesansbold.ttf', 32, "Currently connected peer players: " + str(len(state.players)))
     if "enter" in userData:
         state.cycle = "startup"
     elif "quit" in userData:
@@ -54,27 +54,26 @@ def startup_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    clear(engine)
-    player = PlayerGameState(state.playerId,500,500)
+    engine.clear(engine)
+    player = PlayerGameState(state.playerId, 60, 60)
     EngineActions.addPlayer(state, player)
     audio.startMusic()
     EngineActions.setGameTime(state, 180)
     EngineActions.setLastTime(state, int(datetime.datetime.today().timestamp()))
     assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
-    loadAssets(engine, assets)
-    addMap(engine, state.dimensions)
+    engine.loadAssets(engine, assets)
     state.cycle = "game"
 
 def game_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    clear(engine)
+    engine.clear(engine)
+    map_mask = engine.addMap(engine, "track.png", "track_mask.png", state.dimensions)
+    player_mask = engine.addPlayer(engine, state.players[0], (state.players[0].dimensions[0], state.players[0].dimensions[1]))
     GameActions().handle_actions(state, userData)
-    #FIXME: create functions to change object data
-    addPlayer(engine, state.players[0], state.players[0].dimensions)
-    addText(engine, state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
-    #getCollisions(map_mask, player_mask)
+    engine.addText(engine, state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
+    engine.getCollisions(map_mask, state.players[0], player_mask)
     if int(datetime.datetime.today().timestamp()) > state.lastTime:
         EngineActions.setLastTime(state, int(datetime.datetime.today().timestamp()))
         EngineActions.decreaseGameTime(state, 1)
@@ -87,11 +86,11 @@ def done_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    clear()
-    fill((200, 200, 200))
-    addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Player " + state.firstPlace + " wins!")
-    addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
-    addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'r' to restart game")
+    engine.clear()
+    engine.fill((200, 200, 200))
+    engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Player " + state.firstPlace + " wins!")
+    engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
+    engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'r' to restart game")
     if "quit" in userData:
         state.status = "stopped"
     elif "r" in userData:
@@ -101,8 +100,8 @@ def quit_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    clear()
-    fill((200, 200, 200))
-    addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
+    engine.clear()
+    engine.fill((200, 200, 200))
+    engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
     if "quit" in userData:
         state.status = "stopped"
