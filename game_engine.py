@@ -18,7 +18,7 @@ EVENT_RESTART = "restart"
 EVENT_ENTER = "enter"
 EVENT_QUIT = "quit"
 
-ACCELERATION_FACTOR = 0.5
+ACCELERATION_FACTOR = 1.5
 DECELERATION_FACTOR = 0.9
 ROTATION_INCREMENT = 10
 
@@ -226,20 +226,20 @@ class networking():
         s.close()
 
 class GameActions():
-    def handle_actions(self, state, action):
-        if action == EVENT_ACCELF:
+    def handle_actions(self, state, actions):
+        if EVENT_ACCELF in actions:
             self.accelerate(state, ACCELERATION_FACTOR)
-        elif action == EVENT_ACCELB:
+        if EVENT_ACCELB in actions:
             self.accelerate(state, -ACCELERATION_FACTOR)
-        elif action == EVENT_DECELF:
+        if EVENT_DECELF in actions:
             self.decelerate(state, DECELERATION_FACTOR)
-        elif action == EVENT_DECELB:
+        if EVENT_DECELB in actions:
             self.decelerate(state, -DECELERATION_FACTOR)
-        elif action == EVENT_LEFT:
+        if EVENT_LEFT in actions:
             self.rotate(state, -ROTATION_INCREMENT)
-        elif action == EVENT_RIGHT:
+        if EVENT_RIGHT in actions:
             self.rotate(state, ROTATION_INCREMENT)
-        elif action == EVENT_QUIT:
+        if EVENT_QUIT in actions:
             self.quit(state)
 
     def accelerate(self, state, direction):
@@ -271,7 +271,7 @@ class GameActions():
 
     def rotate(self, state, angle_increment):
         temp_player = state.players[0]
-        temp_player.player_angle += angle_increment
+        temp_player.player_angle -= angle_increment
         state.players[0] = temp_player
 
     def quit(self, state):
@@ -299,14 +299,22 @@ def addText(engine, x_dim, y_dim, font, size, text):
     rect.center = (x_dim, y_dim)
     engine.screen.blit(text, rect)
 
+# Need to add argument for image mask for collisions
 def addMap(engine, image, dimensions):
     img = pygame.image.load(os.path.join("assets", image)).convert()
     scaled = pygame.transform.scale(img, dimensions)
     engine.screen.blit(scaled, (0, 0))
 
-def addPlayer(engine, player):
+# Need to add argument for image mask for collisions
+def addPlayer(engine, player, dimensions):
     img = pygame.image.load(os.path.join("assets", "race_car" + str(player.sprite_id) + ".png")).convert_alpha()
-    engine.screen.blit(img, (player.player_x, player.player_y))
+    img_rect = img.get_rect()
+    rotated = pygame.transform.rotate(img, player.player_angle)
+    rot_rect = img_rect.copy()
+    rot_rect.center = rotated.get_rect().center
+    rotated = rotated.subsurface(rot_rect).copy()
+    scaled = pygame.transform.scale(rotated, dimensions)
+    engine.screen.blit(scaled, (player.player_x, player.player_y))
 
 class audio(GameEngine):
     def startMusic():
