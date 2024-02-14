@@ -30,12 +30,60 @@ class GameEngine():
             self.screen = pygame.display.set_mode(state.dimensions)
             pygame.display.set_caption(state.title)
             self.clock = pygame.time.Clock()
+            self.assets = None
             print("Game initialized")
         except:
             print("Initilization of Game Engine Failed.")
 
-    def storeAssets(self, images):
-        self.assets = dict(images)
+    def render(self):
+        pygame.display.update()
+
+    def fill(self, engine, color):
+        engine.screen.fill(color)
+
+    def clear(self, engine):
+        self.fill(engine, (0, 0, 0))
+
+    def addText(self, engine, x_dim, y_dim, font, size, text):
+        font = pygame.font.Font(font, size)
+        text = font.render(text, True, (0, 0, 0), None)
+        rect = text.get_rect()
+        rect.center = (x_dim, y_dim)
+        engine.screen.blit(text, rect)
+    
+    # Need to add argument for image mask for collisions
+    def addMap(self, engine, map, map_mask, dimensions):
+        scaled = pygame.transform.scale(engine.assets[map], dimensions)
+        engine.screen.blit(scaled, (0, 0))
+
+        scaled_mask = pygame.transform.scale(engine.assets[map_mask], dimensions)
+        mask = pygame.mask.from_surface(scaled_mask)
+        return mask
+
+    # Need to add argument for image mask for collisions
+    def addPlayer(self, engine, player, dimensions):
+        img_rect = engine.assets["race_car0.png"].get_rect()
+        rotated = pygame.transform.rotate(engine.assets["race_car0.png"], player.player_angle)
+        rot_rect = img_rect.copy()
+        rot_rect.center = rotated.get_rect().center
+        rotated = rotated.subsurface(rot_rect).copy()
+        scaled = pygame.transform.scale(rotated, dimensions)
+        engine.screen.blit(scaled, (player.player_x, player.player_y))
+
+        mask = pygame.mask.from_surface(scaled)
+        return mask
+
+    def getCollisions(self, mask1, obj1, mask2):
+        if mask1.overlap(mask2, (obj1.player_x, obj1.player_y)):
+            print("Collision!")
+        else:
+            print("No Collision...")
+
+    def loadAssets(self, engine, assets):
+        surfaces = {}
+        for asset in assets:
+            surfaces[asset] = pygame.image.load(os.path.join("assets", asset)).convert_alpha()
+        engine.assets = surfaces
 
 class EngineActions(GameEngine):
     def addPlayer(state, player):
@@ -279,61 +327,6 @@ class GameActions():
 
     def quit(self, state):
         state.cycle = "quit"
-
-def render():
-    pygame.display.update()
-
-def __init__(self, stateP):
-    try:
-        self.state = stateP
-    except:
-        print("Initilization of screen Failed.")
-
-def fill(engine, color):
-    engine.screen.fill(color)
-
-def clear(engine):
-    fill(engine, (0, 0, 0))
-
-def addText(engine, x_dim, y_dim, font, size, text):
-    font = pygame.font.Font(font, size)
-    text = font.render(text, True, (0, 0, 0), None)
-    rect = text.get_rect()
-    rect.center = (x_dim, y_dim)
-    engine.screen.blit(text, rect)
-
-# Need to add argument for image mask for collisions
-def addMap(engine, dimensions):
-    img = engine.assets["track.png"]
-    scaled = pygame.transform.scale(img, dimensions)
-    engine.screen.blit(scaled, (0, 0))
-    #mask = pygame.mask.from_surface(img_mask)
-    #mask_img = mask.to_surface()
-    #return mask_img
-
-# Need to add argument for image mask for collisions
-def addPlayer(engine, player, dimensions):
-    img = engine.assets["race_car0.png"]
-    img_rect = img.get_rect()
-    rotated = pygame.transform.rotate(img, player.player_angle)
-    rot_rect = img_rect.copy()
-    rot_rect.center = rotated.get_rect().center
-    rotated = rotated.subsurface(rot_rect).copy()
-    scaled = pygame.transform.scale(rotated, dimensions)
-    mask = pygame.mask.from_surface(scaled)
-    mask_img = mask.to_surface()
-    engine.screen.blit(mask_img, (player.player_x, player.player_y))
-    #return mask_img
-
-def getCollisions(mask1, mask2):
-    if mask1.overlap(mask2, mask1.x, mask1.y):
-        print("True")
-
-def loadAssets(engine,assets):
-    surfaces = {}
-    for asset in assets:
-        surfaces[asset] = pygame.image.load(os.path.join("assets", asset)).convert_alpha()
-    engine.storeAssets(surfaces)
 
 class audio(GameEngine):
     def startMusic():
