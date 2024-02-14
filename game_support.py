@@ -60,6 +60,8 @@ def startup_state(engine, state, userData):
     audio.startMusic()
     EngineActions.setGameTime(state, 180)
     EngineActions.setLastTime(state, int(datetime.datetime.today().timestamp()))
+    assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png",]
+    track, track_mask, car0, car1, car2, car3 = loadAssets(assets)
     state.cycle = "game"
 
 def game_state(engine, state, userData):
@@ -67,10 +69,11 @@ def game_state(engine, state, userData):
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
     clear(engine)
-    addMap(engine, "track.png", state.dimensions)
-    addPlayer(engine, state.players[0], (state.players[0].width/8, state.players[0].height/8))
+    map_mask = addMap(engine, "track.png", "track_mask.png", state.dimensions)
+    player_mask = addPlayer(engine, state.players[0], (state.players[0].width/8, state.players[0].height/8))
     GameActions().handle_actions(state, userData)
     addText(engine, state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
+    getCollisions(map_mask, player_mask)
     if int(datetime.datetime.today().timestamp()) > state.lastTime:
         EngineActions.setLastTime(state, int(datetime.datetime.today().timestamp()))
         EngineActions.decreaseGameTime(state, 1)
