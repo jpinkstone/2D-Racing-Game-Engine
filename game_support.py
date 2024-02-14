@@ -1,30 +1,34 @@
 from game_engine import *
 
 def getInput():
+    actions = []
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return EVENT_QUIT
+            actions.append(EVENT_QUIT)
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
-                return EVENT_DECELF
+                actions.append(EVENT_DECELF)
             if event.key == pygame.K_s:
-                return EVENT_DECELB
+                actions.append(EVENT_DECELB)
     
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        return EVENT_ACCELF
+        actions.append(EVENT_ACCELF)
     if keys[pygame.K_s]:
-        return EVENT_ACCELB
+        actions.append(EVENT_ACCELB)
     if keys[pygame.K_a]:
-        return EVENT_LEFT
+        actions.append(EVENT_LEFT)
     if keys[pygame.K_d]:
-        return EVENT_RIGHT
+        actions.append(EVENT_RIGHT)
     if keys[pygame.K_r]:
-        return EVENT_RESTART
+        actions.append(EVENT_RESTART)
     if keys[pygame.K_RETURN]:
-        return EVENT_ENTER
+        actions.append(EVENT_ENTER)
     if keys[pygame.K_q]:
-        return EVENT_QUIT
+        actions.append(EVENT_QUIT)
+
+    return actions
             
 def cycle(engine, state, userData):
     if state.cycle == "menu": menu_state(engine, state, userData)
@@ -41,9 +45,9 @@ def menu_state(engine, state, userData):
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, state.title)
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Press 'Enter' to begin game")
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/4, 'freesansbold.ttf', 32, "Currently connected peer players: " + str(len(state.players)))
-    if userData == "enter":
+    if "enter" in userData:
         state.cycle = "startup"
-    elif userData == "quit":
+    elif "quit" in userData:
         state.status = "stopped"
 
 def startup_state(engine, state, userData):
@@ -64,7 +68,7 @@ def game_state(engine, state, userData):
     # Add stuff to screen (Don't render. Happens in main loop)
     clear(engine)
     addMap(engine, "track.png", state.dimensions)
-    addPlayer(engine, state.players[0])
+    addPlayer(engine, state.players[0], (state.players[0].width/8, state.players[0].height/8))
     GameActions().handle_actions(state, userData)
     addText(engine, state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
     if int(datetime.datetime.today().timestamp()) > state.lastTime:
@@ -72,7 +76,7 @@ def game_state(engine, state, userData):
         EngineActions.decreaseGameTime(state, 1)
     if state.gameTime <= 0:
         state.cycle = "done"
-    if userData == "quit":
+    if "quit" in userData:
         state.status = "stopped"
 
 def done_state(engine, state, userData):
@@ -84,9 +88,9 @@ def done_state(engine, state, userData):
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Player " + state.firstPlace + " wins!")
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'r' to restart game")
-    if userData == "quit":
+    if "quit" in userData:
         state.status = "stopped"
-    elif userData == "r":
+    elif "r" in userData:
         state.cycle = "startup"
 
 def quit_state(engine, state, userData):
@@ -96,5 +100,5 @@ def quit_state(engine, state, userData):
     clear()
     fill((200, 200, 200))
     addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
-    if userData == "quit":
+    if "quit" in userData:
         state.status = "stopped"
