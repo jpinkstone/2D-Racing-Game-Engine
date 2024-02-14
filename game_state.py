@@ -11,9 +11,9 @@ class GameState:
             self.cycle = "menu"
             self.isServer = isServer
             self.playerId = uuid.UUID(int=uuid.getnode())
-            self.map = "assets/track.png"
-            self.mapMask = "assets/track_mask.png"
-            self.playerSprites = ["race_car_blue.png", "race_car_green.png", "race_car_pink.png", "race_car_red.png"]
+            self.map = "track.png"
+            self.mapMask = "track_mask.png"
+            self.playerSprites = ["race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
             self.dimensions = (1920*0.75, 1080*0.75)
             self.gameTime = None
             self.lastTime = None
