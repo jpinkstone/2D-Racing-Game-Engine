@@ -34,6 +34,9 @@ class GameEngine():
         except:
             print("Initilization of Game Engine Failed.")
 
+    def storeAssets(self, images):
+        self.assets = dict(images)
+
 class EngineActions(GameEngine):
     def addPlayer(state, player):
         state.players.append(player)
@@ -300,19 +303,17 @@ def addText(engine, x_dim, y_dim, font, size, text):
     engine.screen.blit(text, rect)
 
 # Need to add argument for image mask for collisions
-def addMap(engine, image, mask, dimensions):
-    img = pygame.image.load(os.path.join("assets", image)).convert()
+def addMap(engine, dimensions):
+    img = engine.assets["track.png"]
     scaled = pygame.transform.scale(img, dimensions)
     engine.screen.blit(scaled, (0, 0))
-
-    img_mask = pygame.image.load(os.path.join("assets", mask)).convert_alpha()
-    mask = pygame.mask.from_surface(img_mask)
-    mask_img = mask.to_surface()
-    return mask_img
+    #mask = pygame.mask.from_surface(img_mask)
+    #mask_img = mask.to_surface()
+    #return mask_img
 
 # Need to add argument for image mask for collisions
 def addPlayer(engine, player, dimensions):
-    img = pygame.image.load(os.path.join("assets", "race_car" + str(player.sprite_id) + ".png")).convert_alpha()
+    img = engine.assets["race_car0.png"]
     img_rect = img.get_rect()
     rotated = pygame.transform.rotate(img, player.player_angle)
     rot_rect = img_rect.copy()
@@ -322,17 +323,17 @@ def addPlayer(engine, player, dimensions):
     mask = pygame.mask.from_surface(scaled)
     mask_img = mask.to_surface()
     engine.screen.blit(mask_img, (player.player_x, player.player_y))
-    return mask_img
+    #return mask_img
 
 def getCollisions(mask1, mask2):
     if mask1.overlap(mask2, mask1.x, mask1.y):
         print("True")
 
-def loadAssets(assets):
-    surfaces = []
+def loadAssets(engine,assets):
+    surfaces = {}
     for asset in assets:
-        surfaces.append(pygame.image.load(os.path.join("assets", asset)).convert_alpha())
-    return surfaces
+        surfaces[asset] = pygame.image.load(os.path.join("assets", asset)).convert_alpha()
+    engine.storeAssets(surfaces)
 
 class audio(GameEngine):
     def startMusic():

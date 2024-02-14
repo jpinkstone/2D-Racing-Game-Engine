@@ -40,8 +40,6 @@ class GameState:
     def unpack(self,encoded_data):
         decoded_data = encoded_data.split(self.delimiter)
         game_state_vars = vars(self)
-        print(game_state_vars)
-        print(decoded_data)
         j = 0
         for key in game_state_vars.keys():
             if key == 'players' or key == 'delimiter': continue
@@ -59,8 +57,7 @@ class GameState:
 class PlayerGameState:
     def __init__(self, id, width, height):
         # Player car info
-        self.width = width
-        self.height = height
+        self.dimensions = (width, height)
         self.playerId = id
         self.player_x = 50
         self.player_y = 50
