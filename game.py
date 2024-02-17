@@ -34,7 +34,7 @@ def mainLoop(send, receive):
 
         cycle(engine, state, userData)    # Update the game cycle
 
-        render()                          # Render the frame and do collisions and physics
+        engine.render()                          # Render the frame and do collisions and physics
 
         engine.clock.tick(30)             # Try to keep the game running at a constant FPS
     #--------------------------------------------------#

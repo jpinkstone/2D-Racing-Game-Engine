@@ -86,8 +86,8 @@ def done_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.clear()
-    engine.fill((200, 200, 200))
+    engine.clear(engine)
+    engine.fill(engine, (200, 200, 200))
     engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Player " + state.firstPlace + " wins!")
     engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
     engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'r' to restart game")
@@ -100,8 +100,8 @@ def quit_state(engine, state, userData):
     # Update game state
     # Do stuff
     # Add stuff to screen (Don't render. Happens in main loop)
-    engine.clear()
-    engine.fill((200, 200, 200))
+    engine.clear(engine)
+    engine.fill(engine,(200, 200, 200))
     engine.addText(engine, state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
     if "quit" in userData:
         state.status = "stopped"

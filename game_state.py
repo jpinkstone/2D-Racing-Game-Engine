@@ -17,6 +17,7 @@ class GameState:
             self.dimensions = (1920*0.75, 1080*0.75)
             self.gameTime = None
             self.lastTime = None
+            self.firstPlace = None
         except:
             print("Initilization of Game State Failed.")
     
