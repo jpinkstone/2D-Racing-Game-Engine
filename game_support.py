@@ -50,9 +50,9 @@ def menu_state(engine, state, userData):
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, state.title)
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Press 'Enter' to begin game")
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/4, 'freesansbold.ttf', 32, "Currently connected peer players: " + str(len(state.players)))
-    if "enter" in userData:
+    if EVENT_ENTER in userData:
         state.cycle = "startup"
-    elif "quit" in userData:
+    elif EVENT_QUIT in userData:
         state.status = "stopped"
 
 def startup_state(engine, state, userData):
@@ -84,7 +84,7 @@ def game_state(engine, state, userData):
         engine.decreaseGameTime(state, 1)
     if state.gameTime <= 0:
         state.cycle = "done"
-    if "quit" in userData:
+    if EVENT_QUIT in userData:
         state.status = "stopped"
 
 def done_state(engine, state, userData):
@@ -96,9 +96,9 @@ def done_state(engine, state, userData):
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Player " + state.firstPlace + " wins!")
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'r' to restart game")
-    if "quit" in userData:
+    if EVENT_QUIT in userData:
         state.status = "stopped"
-    elif "r" in userData:
+    elif EVENT_RESTART in userData:
         state.cycle = "startup"
 
 def quit_state(engine, state, userData):
@@ -108,5 +108,5 @@ def quit_state(engine, state, userData):
     engine.clear()
     engine.screenFill((200, 200, 200))
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
-    if "quit" in userData:
+    if EVENT_QUIT in userData:
         state.status = "stopped"
