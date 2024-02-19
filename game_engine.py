@@ -12,14 +12,15 @@ EVENT_ACCELF = "accelF"
 EVENT_ACCELB = "accelB"
 EVENT_DECELF = "decelF"
 EVENT_DECELB = "decelB"
+EVENT_REDUCE_SPEED = "reduce"
 EVENT_LEFT = "left"
 EVENT_RIGHT = "right"
 EVENT_RESTART = "restart"
 EVENT_ENTER = "enter"
 EVENT_QUIT = "quit"
+EVENT_COLLISION = "collision"
 
 ACCELERATION_FACTOR = 1.5
-DECELERATION_FACTOR = 0.9
 ROTATION_INCREMENT = 10
 
 from game_state import *
@@ -38,64 +39,126 @@ class GameEngine():
     def render(self):
         pygame.display.update()
 
-    def fill(self, engine, color):
-        engine.screen.fill(color)
+    def screenFill(self, color):
+        self.screen.fill(color)
 
-    def clear(self, engine):
-        self.fill(engine, (0, 0, 0))
+    def clear(self):
+        self.screenFill((0, 0, 0))
 
-    def addText(self, engine, x_dim, y_dim, font, size, text):
+    def addText(self, x_dim, y_dim, font, size, text):
         font = pygame.font.Font(font, size)
         text = font.render(text, True, (0, 0, 0), None)
         rect = text.get_rect()
         rect.center = (x_dim, y_dim)
-        engine.screen.blit(text, rect)
+        self.screen.blit(text, rect)
     
     # Need to add argument for image mask for collisions
-    def addMap(self, engine, map, map_mask, dimensions):
-        scaled = pygame.transform.scale(engine.assets[map], dimensions)
-        engine.screen.blit(scaled, (0, 0))
+    def addMap(self, map, map_mask, dimensions):
+        scaled = pygame.transform.scale(self.assets[map], dimensions)
+        self.screen.blit(scaled, (0, 0))
 
-        scaled_mask = pygame.transform.scale(engine.assets[map_mask], dimensions)
+        scaled_mask = pygame.transform.scale(self.assets[map_mask], dimensions)
         mask = pygame.mask.from_surface(scaled_mask)
         return mask
 
     # Need to add argument for image mask for collisions
-    def addPlayer(self, engine, player, dimensions):
-        img_rect = engine.assets["race_car0.png"].get_rect()
-        rotated = pygame.transform.rotate(engine.assets["race_car0.png"], player.player_angle)
+    def placePlayer(self, player, dimensions):
+        img_rect = self.assets["race_car0.png"].get_rect()
+        rotated = pygame.transform.rotate(self.assets["race_car0.png"], player.player_angle)
         rot_rect = img_rect.copy()
         rot_rect.center = rotated.get_rect().center
         rotated = rotated.subsurface(rot_rect).copy()
         scaled = pygame.transform.scale(rotated, dimensions)
-        engine.screen.blit(scaled, (player.player_x, player.player_y))
+        self.screen.blit(scaled, (player.player_x, player.player_y))
 
         mask = pygame.mask.from_surface(scaled)
         return mask
 
-    def getCollisions(self, mask1, obj1, mask2):
+    def getCollisions(self, mask1, obj1, mask2, state):
         if mask1.overlap(mask2, (obj1.player_x, obj1.player_y)):
-            print("Collision!")
-        else:
-            print("No Collision...")
+            self.handle_actions(state, EVENT_COLLISION)
 
-    def loadAssets(self, engine, assets):
+    def loadAssets(self, assets):
         surfaces = {}
         for asset in assets:
             surfaces[asset] = pygame.image.load(os.path.join("assets", asset)).convert_alpha()
-        engine.assets = surfaces
+        self.assets = surfaces
 
-class EngineActions(GameEngine):
-    def addPlayer(state, player):
+    def handle_actions(self, state, actions):
+        if EVENT_ACCELF in actions:
+            self.accelerate(state, ACCELERATION_FACTOR)
+        if EVENT_ACCELB in actions:
+            self.accelerate(state, -ACCELERATION_FACTOR)
+        if EVENT_REDUCE_SPEED in actions:
+            self.decelerate(state)
+        if EVENT_LEFT in actions:
+            self.rotate(state, -ROTATION_INCREMENT)
+        if EVENT_RIGHT in actions:
+            self.rotate(state, ROTATION_INCREMENT)
+        if EVENT_COLLISION in actions:
+            self.bounce(state)
+        if EVENT_QUIT in actions:
+            self.quit(state)
+
+    def accelerate(self, state, direction):
+        temp_player = state.players[0]
+
+        # Adjusting speed
+        temp_player.player_speed += temp_player.acceleration
+        temp_player.player_speed = min(temp_player.player_speed, temp_player.player_max_speed)
+
+        # Calculate velocity
+        temp_player.player_velocity[0] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).x
+        temp_player.player_velocity[1] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).y
+        
+        # Change coordinates
+        temp_player.player_x += temp_player.player_velocity[0]
+        temp_player.player_y += temp_player.player_velocity[1]
+
+        state.players[0] = temp_player
+
+    def decelerate(self, state):
+        temp_player = state.players[0]
+    
+        deceleration = temp_player.acceleration / 2
+        
+        temp_player.player_velocity[0] -= deceleration * (1 if temp_player.player_velocity[0] > 0 else -1)
+        temp_player.player_velocity[1] -= deceleration * (1 if temp_player.player_velocity[1] > 0 else -1)
+        
+        temp_player.player_velocity[0] = max(temp_player.player_velocity[0], -temp_player.player_max_speed)
+        temp_player.player_velocity[1] = max(temp_player.player_velocity[1], -temp_player.player_max_speed)
+        
+        temp_player.player_x += temp_player.player_velocity[0]
+        temp_player.player_y += temp_player.player_velocity[1]
+
+        state.players[0] = temp_player
+
+    def rotate(self, state, angle_increment):
+        temp_player = state.players[0]
+        temp_player.player_angle -= angle_increment
+        state.players[0] = temp_player
+    
+    def bounce(self, state):
+        temp_player = state.players[0]
+
+        temp_player.player_velocity[0] = -temp_player.player_velocity[0]
+        temp_player.player_velocity[1] = -temp_player.player_velocity[1]
+
+        state.players[0] = temp_player
+
+    def quit(self, state):
+        state.cycle = "quit"
+
+    def addPlayer(self, state, player):
         state.players.append(player)
     
-    def setGameTime(state, seconds):
+    def setGameTime(self, state, seconds):
         state.gameTime = seconds
 
-    def setLastTime(state, time):
+    def setLastTime(self, state, time):
         state.lastTime = time
     
-    def decreaseGameTime(state, num):
+    def decreaseGameTime(self, state, num):
         state.gameTime -= num
     
 class PlayerAI(GameEngine):
@@ -275,58 +338,6 @@ class networking():
                     sockets_list[client].sendall(self.sendQ.get().encode())
                     
         s.close()
-
-class GameActions():
-    def handle_actions(self, state, actions):
-        if EVENT_ACCELF in actions:
-            self.accelerate(state, ACCELERATION_FACTOR)
-        if EVENT_ACCELB in actions:
-            self.accelerate(state, -ACCELERATION_FACTOR)
-        if EVENT_DECELF in actions:
-            self.decelerate(state, DECELERATION_FACTOR)
-        if EVENT_DECELB in actions:
-            self.decelerate(state, -DECELERATION_FACTOR)
-        if EVENT_LEFT in actions:
-            self.rotate(state, -ROTATION_INCREMENT)
-        if EVENT_RIGHT in actions:
-            self.rotate(state, ROTATION_INCREMENT)
-        if EVENT_QUIT in actions:
-            self.quit(state)
-
-    def accelerate(self, state, direction):
-        temp_player = state.players[0]
-
-        # Adjusting speed
-        temp_player.player_speed += temp_player.acceleration
-        temp_player.player_speed = min(temp_player.player_speed, temp_player.player_max_speed)
-
-        # Calculate velocity
-        temp_player.player_velocity[0] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).x
-        temp_player.player_velocity[1] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).y
-        
-        # Change coordinates
-        temp_player.player_x += temp_player.player_velocity[0]
-        temp_player.player_y += temp_player.player_velocity[1]
-
-        state.players[0] = temp_player
-
-    def decelerate(self, state, factor):
-        temp_player = state.players[0]
-
-        temp_player.player_velocity[0] *= factor
-        temp_player.player_velocity[1] *= factor
-        temp_player.player_x += temp_player.player_velocity[0]
-        temp_player.player_y += temp_player.player_velocity[1]
-
-        state.players[0] = temp_player
-
-    def rotate(self, state, angle_increment):
-        temp_player = state.players[0]
-        temp_player.player_angle -= angle_increment
-        state.players[0] = temp_player
-
-    def quit(self, state):
-        state.cycle = "quit"
 
 class audio(GameEngine):
     def startMusic():

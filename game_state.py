@@ -63,11 +63,11 @@ class PlayerGameState:
         self.player_x = 50
         self.player_y = 50
         self.player_speed = 1
-        self.player_max_speed = 5  # Increased max speed
+        self.player_max_speed = 10  # Increased max speed
         self.deceleration_factor = 0.2
         self.player_velocity = [0, 0]
         self.player_angle = 0  # Initial angle in degrees
-        self.acceleration = 2
+        self.acceleration = 4
         self.player_velocity[0] = 0
         self.player_velocity[1] = 0
         self.score = 0
