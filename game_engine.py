@@ -260,17 +260,17 @@ class networking():
 
         while True:
             if self.status == "stopped":
-                print("Exiting")
+                print("Exiting...")
                 break
             if self.sendQ.qsize():
                 s.sendall(self.sendQ.get().encode())
             try:
                 message = s.recv(1024).decode()
             except:
-                print("Exiting")
+                print("Exiting...")
                 break
             if not message or message == "exit":
-                print("Exiting")
+                print("Exiting...")
                 break
             else:
                 self.receiveQ.put(message)
