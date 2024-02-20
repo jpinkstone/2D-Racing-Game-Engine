@@ -13,33 +13,31 @@ serverIp = "127.0.0.1"
 port = 60217
 
 if isServer:
-    Net = networking("server", "127.0.0.1", port)
+    net = networking("server", "127.0.0.1", port)
 else:
-    Net = networking("client", serverIp, port)
+    net = networking("client", serverIp, port)
 
-def mainLoop(send, receive):
-    pygame.init()
-    state = GameState(isServer)
-    engine = GameEngine(state)
+pygame.init()
+net.start()
+state = GameState(isServer)
+engine = GameEngine(state)
+
+#------------------Main Game Loop------------------#
+while (state.status != "stopped"):
+    userData = getInput()             # Get user input
+
+    net.send("This is a message from the server")              # Send current game state to other networking players
+
+    networkData = net.receive()       # Get other networking player states and update game state
+    if networkData != None:
+        print(networkData)
+
+    cycle(engine, state, userData)    # Update the game cycle
+
+    engine.render()                   # Render the frame and do collisions and physics
+
+    engine.clock.tick(30)             # Try to keep the game running at a constant FPS
+#--------------------------------------------------#
     
-    #------------------Main Game Loop------------------#
-    while (state.status != "stopped"):
-        userData = getInput()             # Get user input
-
-        # networkData = receive()         # Get other networking player states and update game state
-        # if networkData != "None":
-        #     state.unpack(networkData)
-
-        # send(state.pack())              # Send current game state to other networking players
-
-        cycle(engine, state, userData)    # Update the game cycle
-
-        engine.render()                          # Render the frame and do collisions and physics
-
-        engine.clock.tick(30)             # Try to keep the game running at a constant FPS
-    #--------------------------------------------------#
-    pygame.quit()
-    Net.end()
-
-if __name__ == '__main__':
-    Net.start(mainLoop)
+pygame.quit()
+net.end()
