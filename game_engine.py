@@ -7,6 +7,7 @@ import math
 import sys
 import os
 import datetime
+from pygame import mixer 
 
 EVENT_ACCELF = "accelF"
 EVENT_ACCELB = "accelB"
@@ -20,8 +21,9 @@ EVENT_ENTER = "enter"
 EVENT_QUIT = "quit"
 EVENT_COLLISION = "collision"
 
-ACCELERATION_FACTOR = 1.5
-ROTATION_INCREMENT = 10
+mixer.init()
+accel_sound = pygame.mixer.Sound(os.path.join("assets", "Recording.wav"))
+accel_sound.set_volume(0.2)
 
 from game_state import *
 
@@ -63,8 +65,8 @@ class GameEngine():
 
     # Need to add argument for image mask for collisions
     def placePlayer(self, player, dimensions):
-        img_rect = self.assets["race_car0.png"].get_rect()
-        rotated = pygame.transform.rotate(self.assets["race_car0.png"], player.player_angle)
+        img_rect = self.assets["race_car2.png"].get_rect()
+        rotated = pygame.transform.rotate(self.assets["race_car2.png"], player.player_angle)
         rot_rect = img_rect.copy()
         rot_rect.center = rotated.get_rect().center
         rotated = rotated.subsurface(rot_rect).copy()
@@ -76,7 +78,9 @@ class GameEngine():
 
     def getCollisions(self, mask1, obj1, mask2, state):
         if mask1.overlap(mask2, (obj1.player_x, obj1.player_y)):
-            self.handle_actions(state, EVENT_COLLISION)
+            return True
+        else:
+            return False
 
     def loadAssets(self, assets):
         surfaces = {}
@@ -86,66 +90,59 @@ class GameEngine():
 
     def handle_actions(self, state, actions):
         if EVENT_ACCELF in actions:
-            self.accelerate(state, ACCELERATION_FACTOR)
+            self.forward(state)
         if EVENT_ACCELB in actions:
-            self.accelerate(state, -ACCELERATION_FACTOR)
+            self.backward(state)
         if EVENT_REDUCE_SPEED in actions:
             self.decelerate(state)
         if EVENT_LEFT in actions:
-            self.rotate(state, -ROTATION_INCREMENT)
+            self.rotate(state, -1)
         if EVENT_RIGHT in actions:
-            self.rotate(state, ROTATION_INCREMENT)
+            self.rotate(state, 1)
         if EVENT_COLLISION in actions:
             self.bounce(state)
         if EVENT_QUIT in actions:
             self.quit(state)
 
-    def accelerate(self, state, direction):
-        temp_player = state.players[0]
+    def forward(self, state):
+        temp_player = state.players[state.player_id]
+        audio.accelerateSound()
+        temp_player.vel = min(temp_player.vel + temp_player.acceleration, temp_player.max_vel)
+        self.move(state)
 
-        # Adjusting speed
-        temp_player.player_speed += temp_player.acceleration
-        temp_player.player_speed = min(temp_player.player_speed, temp_player.player_max_speed)
-
-        # Calculate velocity
-        temp_player.player_velocity[0] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).x
-        temp_player.player_velocity[1] = direction * temp_player.player_speed * pygame.math.Vector2(1, 0).rotate(-temp_player.player_angle).y
-        
-        # Change coordinates
-        temp_player.player_x += temp_player.player_velocity[0]
-        temp_player.player_y += temp_player.player_velocity[1]
-
-        state.players[0] = temp_player
+    def backward(self, state):
+        temp_player = state.players[state.player_id]
+        audio.accelerateSound()
+        temp_player.vel = min(temp_player.vel - temp_player.acceleration, -temp_player.max_vel/2)
+        self.move(state)
 
     def decelerate(self, state):
-        temp_player = state.players[0]
-    
-        deceleration = temp_player.acceleration / 2
-        
-        temp_player.player_velocity[0] -= deceleration * (1 if temp_player.player_velocity[0] > 0 else -1)
-        temp_player.player_velocity[1] -= deceleration * (1 if temp_player.player_velocity[1] > 0 else -1)
-        
-        temp_player.player_velocity[0] = max(temp_player.player_velocity[0], -temp_player.player_max_speed)
-        temp_player.player_velocity[1] = max(temp_player.player_velocity[1], -temp_player.player_max_speed)
-        
-        temp_player.player_x += temp_player.player_velocity[0]
-        temp_player.player_y += temp_player.player_velocity[1]
+        temp_player = state.players[state.player_id]
+        temp_player.vel = max(temp_player.vel - temp_player.acceleration / 2, 0)
+        self.move(state)
 
+    def rotate(self, state, direction):
+        temp_player = state.players[state.player_id]
+        temp_player.player_angle -= temp_player.angle_increment * direction
         state.players[0] = temp_player
 
-    def rotate(self, state, angle_increment):
-        temp_player = state.players[0]
-        temp_player.player_angle -= angle_increment
-        state.players[0] = temp_player
+    def move(self, state):
+        temp_player = state.players[state.player_id]
+        radians = math.radians(temp_player.player_angle)
+        
+        # Calculate the components based on player's velocity without the negative sign
+        vertical = math.cos(radians) * temp_player.vel
+        horizontal = math.sin(radians) * temp_player.vel
+
+        # Update player's position
+        temp_player.player_x += horizontal
+        temp_player.player_y += vertical
+
+        state.players[state.player_id] = temp_player
     
     def bounce(self, state):
-        temp_player = state.players[0]
-
-        temp_player.player_velocity[0] = -temp_player.player_velocity[0]
-        temp_player.player_velocity[1] = -temp_player.player_velocity[1]
-
-        state.players[0] = temp_player
-
+        state.players[state.player_id].vel = -state.players[state.player_id].vel
+        
     def quit(self, state):
         state.cycle = "quit"
 
@@ -342,6 +339,8 @@ class networking():
 class audio(GameEngine):
     def startMusic():
         pass
+    def accelerateSound():
+        pygame.mixer.Sound.play(accel_sound)
 
 class physics(GameEngine):
     pass

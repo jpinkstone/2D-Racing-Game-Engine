@@ -1,5 +1,9 @@
 import uuid
 
+ACCELERATION_FACTOR = 0.1
+ROTATION_INCREMENT = 5
+MAX_VELOCITY = 5
+
 class GameState:
     # Initialize the total amount of players in the form of a list
     def __init__(self, isServer):
@@ -10,7 +14,7 @@ class GameState:
             self.status = "running"
             self.cycle = "menu"
             self.isServer = isServer
-            self.playerId = uuid.UUID(int=uuid.getnode())
+            self.player_id = uuid.UUID(int=uuid.getnode()) # Why UUID? TypeError: list indices must be integers or slices, not UUID
             self.map = "track.png"
             self.mapMask = "track_mask.png"
             self.playerSprites = ["race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
@@ -59,16 +63,14 @@ class PlayerGameState:
     def __init__(self, id, width, height):
         # Player car info
         self.dimensions = (width, height)
-        self.playerId = id
-        self.player_x = 50
-        self.player_y = 50
-        self.player_speed = 1
-        self.player_max_speed = 10  # Increased max speed
-        self.deceleration_factor = 0.2
-        self.player_velocity = [0, 0]
-        self.player_angle = 0  # Initial angle in degrees
-        self.acceleration = 4
-        self.player_velocity[0] = 0
-        self.player_velocity[1] = 0
+        self.player_id = id
+        self.player_x = 600
+        self.player_y = 650
         self.score = 0
         self.sprite_id = 0
+        # Movement
+        self.vel = 0
+        self.player_angle = 90
+        self.max_vel = MAX_VELOCITY
+        self.acceleration = ACCELERATION_FACTOR
+        self.angle_increment = ROTATION_INCREMENT
