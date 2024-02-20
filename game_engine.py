@@ -212,129 +212,113 @@ class PlayerAI(GameEngine):
         super().move()
 
 class networking():
-    # Initialize networking variables, connection type, and data queues
+    # Initialize networking variables
     def __init__(self, type, ip, port):
         try:
             self.type = type
             self.host = ip
             self.port = port
-            self.sendQ = queue.Queue()
-            self.receiveQ = queue.Queue()
-            self.status = "running"
+            self.sock = None
+            self.connected = []
+            self.status = None
         except:
             print("Initilization of networking Failed.")
 
-    # Start networking and main loop threads
-    def start(self, gameLoop):
+    # Start the networking socket
+    def start(self):
         if self.type == "server":
-            network = threading.Thread(target=self.networkingThreadServer, args=())
-        else:
-            network = threading.Thread(target=self.networkingThreadClient, args=())
-        main = threading.Thread(target=gameLoop, args=(self.send, self.receive))
-        network.start()
-        main.start()
-        main.join()
-        sys.exit()
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock = s
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind((self.host, self.port))
+            s.listen()
+            self.connected.append(s)
+        else: 
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock = s
+            s.connect((self.host, self.port))
+        self.status = "active"
 
-    def end(self):
-        self.status = "stopped"
-    
-    # Send data to all connected devices
-    def send(self, data):
-        self.sendQ.put(data)
-
-    # Receive data from all connected devices
+    # Receive data from the connected peers
     def receive(self):
-        if self.receiveQ.qsize():
-            return self.receiveQ.get()
-    
-    # Handle networking for the client devices
-    def networkingThreadClient(self):
-        print("Starting client networking thread...")
+        if self.status == "active":
+            if self.type == "server":
+                read_sockets, _, exception_sockets = select.select(self.connected, [], self.connected, 0)
+                for notified_socket in read_sockets:
+                    # New connection
+                    if notified_socket == self.sock:
+                        client_socket, client_address = self.sock.accept()
+                        try:
+                            message = client_socket.recv(1024).decode()
+                        except:
+                            print("A client disconnected")
+                            self.status = "inactive"
+                            return None
+                        
+                        if message is False:
+                            print("A client disconnected")
+                            self.status = "inactive"
+                            return None
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.host, self.port))
+                        self.connected.append(client_socket)
+                        return message
 
-        while True:
-            if self.status == "stopped":
-                print("Exiting...")
-                break
-            if self.sendQ.qsize():
-                s.sendall(self.sendQ.get().encode())
-            try:
-                message = s.recv(1024).decode()
-            except:
-                print("Exiting...")
-                break
-            if not message or message == "exit":
-                print("Exiting...")
-                break
-            else:
-                self.receiveQ.put(message)
-        s.close()
-    
-    # Handle networking for the server device
-    def networkingThreadServer(self):
-        print("Starting server networking thread...")
+                    # Existing client is sending a message
+                    else:
+                        try:
+                            message = notified_socket.recv(1024).decode()
+                        except:
+                            print("A client disconnected")
+                            self.status = "inactive"
+                            return None
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind((self.host, self.port))
-        s.listen()
+                        if message is False:
+                            self.connected.remove(notified_socket)
+                            print("A client disconnected")
+                            self.status = "inactive"
 
-        sockets_list = [s]
-        exit_flag = False
+                        for notified_socket in exception_sockets:
+                            self.connected.remove(notified_socket)
+                            print("A client disconnected")
+                            self.status = "inactive"
 
-        while True:
-            if self.status == "stopped":
-                exit_flag = True
-            read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list, 0)
-            for notified_socket in read_sockets:
-                # New connection
-                if notified_socket == s:
-                    client_socket, client_address = s.accept()
-                    try:
-                        message = client_socket.recv(1024).decode()
-                    except:
-                        exit_flag = True
-                        break
-                    if message is False:
-                        continue
-                    elif message == "exit":
-                        exit_flag = True
-                        break
-
-                    sockets_list.append(client_socket)
-                    self.receiveQ.put(message)
-                # Existing client is sending a message
+                        return message
+            else: 
+                try:
+                    message = self.sock.recv(1024).decode()
+                except:
+                    print("The server disconnected")
+                    self.status = "inactive"
+                    return None
+                
+                if not message:
+                    print("The server disconnected")
+                    self.status = "inactive"
+                    return None
                 else:
-                    try:
-                        message = notified_socket.recv(1024).decode()
-                    except:
-                        exit_flag = True
-                        break
+                    return message
 
-                    if message is False:
-                        sockets_list.remove(notified_socket)
-                        continue
-                    elif message == "exit":
-                        exit_flag = True
-                        break
-
-                    self.receiveQ.put(message)
-
-            if exit_flag:
-                print("Exiting...")
-                break
-
-            for notified_socket in exception_sockets:
-                sockets_list.remove(notified_socket)
-            
-            if self.sendQ.qsize() and len(sockets_list) > 1:
-                for client in range(1, len(sockets_list)):
-                    sockets_list[client].sendall(self.sendQ.get().encode())
-                    
-        s.close()
+    # Send data to the connected peers
+    def send(self, data):
+        if self.status == "active":
+            if self.type == "server":
+                try:
+                    if len(self.connected) > 1:
+                        for client in range(1, len(self.connected)):
+                            self.connected[client].sendall(data.encode())
+                except:
+                    print("A client disconnected")
+                    self.status = "inactive"
+            else: 
+                try:
+                    self.sock.sendall(data.encode())
+                except:
+                    print("The server disconnected")
+                    self.status = "inactive"
+    
+    # End the network socket connection
+    def end(self):
+        self.sock.close()
 
 class audio(GameEngine):
     def startMusic():
