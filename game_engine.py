@@ -221,6 +221,7 @@ class networking():
             self.sock = None
             self.connected = []
             self.status = None
+            self.receiveSize = 4096
         except:
             print("Initilization of networking Failed.")
 
@@ -249,7 +250,7 @@ class networking():
                     if notified_socket == self.sock:
                         client_socket, client_address = self.sock.accept()
                         try:
-                            message = client_socket.recv(1024).decode()
+                            message = client_socket.recv(self.receiveSize).decode()
                         except:
                             print("A client disconnected")
                             return None
@@ -264,7 +265,7 @@ class networking():
                     # Existing client is sending a message
                     else:
                         try:
-                            message = notified_socket.recv(1024).decode()
+                            message = notified_socket.recv(self.receiveSize).decode()
                         except:
                             self.connected.remove(notified_socket)
                             print("A client disconnected")
@@ -281,7 +282,7 @@ class networking():
                         return message
             else: 
                 try:
-                    message = self.sock.recv(1024).decode()
+                    message = self.sock.recv(self.receiveSize).decode()
                 except:
                     print("The server disconnected")
                     self.status = "inactive"
