@@ -54,6 +54,7 @@ def menu_state(engine, state, userData):
         state.cycle = "startup"
     elif EVENT_QUIT in userData:
         state.status = "stopped"
+        print("Exiting...")
 
 def startup_state(engine, state, userData):
     # Update game state
@@ -90,6 +91,7 @@ def game_state(engine, state, userData):
         state.cycle = "done"
     if EVENT_QUIT in userData:
         state.status = "stopped"
+        print("Exiting...")
 
 def done_state(engine, state, userData):
     # Update game state
@@ -102,6 +104,7 @@ def done_state(engine, state, userData):
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'r' to restart game")
     if EVENT_QUIT in userData:
         state.status = "stopped"
+        print("Exiting...")
     elif EVENT_RESTART in userData:
         state.cycle = "startup"
 
@@ -114,3 +117,4 @@ def quit_state(engine, state, userData):
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
     if EVENT_QUIT in userData:
         state.status = "stopped"
+        print("Exiting...")
