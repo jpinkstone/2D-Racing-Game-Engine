@@ -43,13 +43,12 @@ def cycle(engine, state, userData):
     elif state.cycle == "quit": quit_state(engine, state, userData)
 
 def menu_state(engine, state, userData):
-    # Update game state
-    # Do stuff
-    # Add stuff to screen (Don't render. Happens in main loop)
     engine.screenFill((200, 200, 200))
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, state.title)
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Press 'Enter' to begin game")
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/4, 'freesansbold.ttf', 32, "Currently connected peer players: " + str(len(state.players)))
+    engine.loadAssets(["splash.jpg"])
+    engine.addSplash("splash.jpg", state.dimensions)
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.35, "assets/paladins.ttf", 55, (255, 255, 255), "Tiny Turismo")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.25, "assets/paladins.ttf", 20, (255, 255, 255), "Press Enter to Start")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.1, "assets/paladins.ttf", 15, (255, 255, 255), "Connected Players: " + str(len(state.players)))
     if EVENT_ENTER in userData:
         state.cycle = "startup"
     elif EVENT_QUIT in userData:
@@ -57,9 +56,6 @@ def menu_state(engine, state, userData):
         print("Exiting...")
 
 def startup_state(engine, state, userData):
-    # Update game state
-    # Do stuff
-    # Add stuff to screen (Don't render. Happens in main loop)
     engine.clear()
     player = PlayerGameState(state.player_id, 60, 60)
     state.player_id = 0
@@ -72,9 +68,6 @@ def startup_state(engine, state, userData):
     state.cycle = "game"
 
 def game_state(engine, state, userData):
-    # Update game state
-    # Do stuff
-    # Add stuff to screen (Don't render. Happens in main loop)
     engine.clear()
     map_mask = engine.addMap("track.png", "track_mask.png", state.dimensions)
     player_mask = engine.placePlayer(state.players[0], (state.players[0].dimensions[0], state.players[0].dimensions[1]))
@@ -83,7 +76,7 @@ def game_state(engine, state, userData):
         engine.bounce(state)
     engine.handle_actions(state, userData)
 
-    engine.addText(state.dimensions[0]-125, 25, 'freesansbold.ttf', 32, "Time left: " + str(state.gameTime))
+    engine.addText(state.dimensions[0]-200, 25, "assets/paladins.ttf", 17, (0, 0, 0), "Time left: " + str(state.gameTime))
     if int(datetime.datetime.today().timestamp()) > state.lastTime:
         engine.setLastTime(state, int(datetime.datetime.today().timestamp()))
         engine.decreaseGameTime(state, 1)
@@ -94,14 +87,11 @@ def game_state(engine, state, userData):
         print("Exiting...")
 
 def done_state(engine, state, userData):
-    # Update game state
-    # Do stuff
-    # Add stuff to screen (Don't render. Happens in main loop)
     engine.clear()
     engine.screenFill((200, 200, 200))
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/2, 'freesansbold.ttf', 32, "Player " + state.firstPlace + " wins!")
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'r' to restart game")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/2, "assets/paladins.ttf", 32, (0, 0, 0), "Player " + state.firstPlace + " wins!")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'q' to exit game")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'r' to restart game")
     if EVENT_QUIT in userData:
         state.status = "stopped"
         print("Exiting...")
@@ -109,12 +99,9 @@ def done_state(engine, state, userData):
         state.cycle = "startup"
 
 def quit_state(engine, state, userData):
-    # Update game state
-    # Do stuff
-    # Add stuff to screen (Don't render. Happens in main loop)
     engine.clear()
     engine.screenFill((200, 200, 200))
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, 'freesansbold.ttf', 32, "Press 'q' to exit game")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'q' to exit game")
     if EVENT_QUIT in userData:
         state.status = "stopped"
         print("Exiting...")
