@@ -2,12 +2,13 @@ import socket
 import threading
 import queue
 import select
-import pygame
 import math
 import sys
-import os
 import datetime
-from pygame import mixer 
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+import pygame
+from pygame import mixer
 
 EVENT_ACCELF = "accelF"
 EVENT_ACCELB = "accelB"
