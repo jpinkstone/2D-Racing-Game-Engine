@@ -48,14 +48,13 @@ class GameEngine():
     def clear(self):
         self.screenFill((0, 0, 0))
 
-    def addText(self, x_dim, y_dim, font, size, text):
+    def addText(self, x_dim, y_dim, font, size, color, text):
         font = pygame.font.Font(font, size)
-        text = font.render(text, True, (0, 0, 0), None)
+        text = font.render(text, True, color, None)
         rect = text.get_rect()
         rect.center = (x_dim, y_dim)
         self.screen.blit(text, rect)
     
-    # Need to add argument for image mask for collisions
     def addMap(self, map, map_mask, dimensions):
         scaled = pygame.transform.scale(self.assets[map], dimensions)
         self.screen.blit(scaled, (0, 0))
@@ -63,8 +62,11 @@ class GameEngine():
         scaled_mask = pygame.transform.scale(self.assets[map_mask], dimensions)
         mask = pygame.mask.from_surface(scaled_mask)
         return mask
+    
+    def addSplash(self, splash, dimensions):
+        scaled = pygame.transform.scale(self.assets[splash], dimensions)
+        self.screen.blit(scaled, (0, 0))
 
-    # Need to add argument for image mask for collisions
     def placePlayer(self, player, dimensions):
         img_rect = self.assets["race_car2.png"].get_rect()
         rotated = pygame.transform.rotate(self.assets["race_car2.png"], player.player_angle)
