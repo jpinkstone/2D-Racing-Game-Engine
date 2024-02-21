@@ -252,12 +252,10 @@ class networking():
                             message = client_socket.recv(1024).decode()
                         except:
                             print("A client disconnected")
-                            self.status = "inactive"
                             return None
                         
                         if message is False:
                             print("A client disconnected")
-                            self.status = "inactive"
                             return None
 
                         self.connected.append(client_socket)
@@ -268,19 +266,17 @@ class networking():
                         try:
                             message = notified_socket.recv(1024).decode()
                         except:
+                            self.connected.remove(notified_socket)
                             print("A client disconnected")
-                            self.status = "inactive"
                             return None
 
                         if message is False:
                             self.connected.remove(notified_socket)
                             print("A client disconnected")
-                            self.status = "inactive"
 
                         for notified_socket in exception_sockets:
                             self.connected.remove(notified_socket)
                             print("A client disconnected")
-                            self.status = "inactive"
 
                         return message
             else: 
@@ -302,13 +298,15 @@ class networking():
     def send(self, data):
         if self.status == "active":
             if self.type == "server":
+                currentSock = None
                 try:
                     if len(self.connected) > 1:
                         for client in range(1, len(self.connected)):
+                            currentSock = self.connected[client]
                             self.connected[client].sendall(data.encode())
                 except:
+                    self.connected.remove(currentSock)
                     print("A client disconnected")
-                    self.status = "inactive"
             else: 
                 try:
                     self.sock.sendall(data.encode())
