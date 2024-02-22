@@ -149,8 +149,8 @@ class GameEngine():
     def quit(self, state):
         state.cycle = "quit"
 
-    def addPlayer(self, state, player):
-        state.players.append(player)
+    def addPlayer(self, state, ID, player):
+        state.players[ID] = player
     
     def setGameTime(self, state, seconds):
         state.gameTime = seconds

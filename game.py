@@ -26,11 +26,14 @@ engine = GameEngine(state)
 while (state.status != "stopped"):
     userData = getInput()             # Get user input
 
-    net.send("This is a message from the server")              # Send current game state to other networking players
+    stateData = state.pack()
+    print(stateData)
+
+    net.send(stateData)
 
     networkData = net.receive()       # Get other networking player states and update game state
     if networkData != None:
-        print(networkData)
+        state.unpack(networkData)
 
     cycle(engine, state, userData)    # Update the game cycle
 

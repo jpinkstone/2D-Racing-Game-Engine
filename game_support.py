@@ -57,9 +57,8 @@ def menu_state(engine, state, userData):
 
 def startup_state(engine, state, userData):
     engine.clear()
-    player = PlayerGameState(state.player_id, 60, 60)
-    state.player_id = 0
-    engine.addPlayer(state, player)
+    player = PlayerGameState(60, 60)
+    engine.addPlayer(state, state.player_id, player)
     audio.startMusic()
     engine.setGameTime(state, 180)
     engine.setLastTime(state, int(datetime.datetime.today().timestamp()))
@@ -70,9 +69,9 @@ def startup_state(engine, state, userData):
 def game_state(engine, state, userData):
     engine.clear()
     map_mask = engine.addMap("track.png", "track_mask.png", state.dimensions)
-    player_mask = engine.placePlayer(state.players[0], (state.players[0].dimensions[0], state.players[0].dimensions[1]))
+    player_mask = engine.placePlayer(state.players[state.player_id], (state.players[state.player_id].dimensions[0], state.players[state.player_id].dimensions[1]))
     
-    if engine.getCollisions(map_mask, state.players[0], player_mask, state):
+    if engine.getCollisions(map_mask, state.players[state.player_id], player_mask, state):
         engine.bounce(state)
     engine.handle_actions(state, userData)
 
