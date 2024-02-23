@@ -68,16 +68,17 @@ class GameEngine():
         self.screen.blit(scaled, (0, 0))
 
     def placePlayer(self, player, dimensions):
-        img_rect = self.assets["race_car2.png"].get_rect()
-        rotated = pygame.transform.rotate(self.assets["race_car2.png"], player.player_angle)
-        rot_rect = img_rect.copy()
-        rot_rect.center = rotated.get_rect().center
-        rotated = rotated.subsurface(rot_rect).copy()
-        scaled = pygame.transform.scale(rotated, dimensions)
-        self.screen.blit(scaled, (player.player_x, player.player_y))
+        if player.sprite_id != None: 
+            img_rect = self.assets[player.sprite_id].get_rect()
+            rotated = pygame.transform.rotate(self.assets[player.sprite_id], player.player_angle)
+            rot_rect = img_rect.copy()
+            rot_rect.center = rotated.get_rect().center
+            rotated = rotated.subsurface(rot_rect).copy()
+            scaled = pygame.transform.scale(rotated, dimensions)
+            self.screen.blit(scaled, (player.player_x, player.player_y))
 
-        mask = pygame.mask.from_surface(scaled)
-        return mask
+            mask = pygame.mask.from_surface(scaled)
+            return mask
 
     def getCollisions(self, mask1, obj1, mask2, state):
         if mask1.overlap(mask2, (obj1.player_x, obj1.player_y)):
