@@ -7,14 +7,16 @@ MAX_VELOCITY = 5
 
 class GameState:
     # Initialize the total amount of players in the form of a list
-    def __init__(self, isServer):
+    def __init__(self, isServer, sprite_id):
         try:
             self.title = "Tiny Turismo"
             self.players = {}
             self.delimiter = "|"
             self.status = "running"
             self.cycle = "menu"
+            self.startup = False
             self.isServer = isServer
+            self.sprite_id = sprite_id
             self.player_id = uuid.uuid4().int
             self.map = "track.png"
             self.mapMask = "track_mask.png"
@@ -148,7 +150,7 @@ class PlayerGameState:
         self.player_x = 600
         self.player_y = 650
         self.score = 0
-        self.sprite_id = 0
+        self.sprite_id = None
         # Movement
         self.vel = 0
         self.player_angle = 90
