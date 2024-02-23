@@ -8,6 +8,7 @@ from game_state import *
 from game_engine import *
 from game_support import *
 
+sprite = SPRITE_RED
 isServer = True
 serverIp = "127.0.0.1"
 port = 60217
@@ -19,20 +20,17 @@ else:
 
 pygame.init()
 net.start()
-state = GameState(isServer)
+state = GameState(isServer, sprite)
 engine = GameEngine(state)
 
 #------------------Main Game Loop------------------#
 while (state.status != "stopped"):
     userData = getInput()             # Get user input
 
-    stateData = state.pack()
+    net.send(state.pack())            # Send player and game data to connected players
 
-    net.send(stateData)
-
-    networkData = net.receive()       # Get other networking player states and update game state
+    networkData = net.receive()       # Receive connected player data and update game
     if networkData != None:
-        print(networkData)
         state.unpack(networkData)
 
     cycle(engine, state, userData)    # Update the game cycle
