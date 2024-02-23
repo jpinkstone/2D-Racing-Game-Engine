@@ -224,7 +224,7 @@ class networking():
             self.sock = None
             self.connected = []
             self.status = None
-            self.receiveSize = 4096
+            self.receiveSize = 2048
         except:
             print("Initilization of networking Failed.")
 
