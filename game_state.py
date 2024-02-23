@@ -36,11 +36,12 @@ class GameState:
         # Pack the game state variables
         encoded_data += self.pack_game_state()
         
-        # Pack variables for every player
+        # Pack variables for local player
         if self.players:
-            for id, player in self.players.items():
-                if id == self.player_id:
-                    encoded_data += self.pack_player_state(self.player_id,self.players[self.player_id])
+            if self.player_id in self.players.keys():
+                encoded_data += self.pack_player_state(self.player_id,self.players[self.player_id])
+            else:
+                encoded_data += "{" + str(self.player_id) + "}"  
         else:
             encoded_data += "{" + str(self.player_id) + "}"
 
@@ -57,7 +58,7 @@ class GameState:
         return encoded_data
 
     def pack_player_state(self,id,player):
-        encoded_data = "{" + str(id) + "|"
+        encoded_data = "{" + str(id) + self.delimiter
         player_data = vars(player)
         
         for var in player_data:
