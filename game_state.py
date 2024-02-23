@@ -24,6 +24,7 @@ class GameState:
             self.lastTime = None
             self.firstPlace = None
             self.important_vars = ['status','lastTime','firstPlace','gameTime','cycle']
+            self.time_vars = ['lastTime','firstPlace','gameTime']
         except:
             print("Initilization of Game State Failed.")
     
@@ -36,7 +37,8 @@ class GameState:
         # Pack variables for every player
         if self.players:
             for id, player in self.players.items():
-                encoded_data += self.pack_player_state(id,player)
+                if id == self.player_id:
+                    encoded_data += self.pack_player_state(self.player_id,self.players[self.player_id])
         else:
             encoded_data += "{" + str(self.player_id) + "}"
 
@@ -86,7 +88,10 @@ class GameState:
         i = 0
         for key in game_state_vars.keys():
             if key in self.important_vars:
-                setattr(self,key,decoded_data[i])
+                value = decoded_data[i]
+                if key in self.time_vars and value != 'None':
+                    value = int(value)
+                setattr(self,key,value)
                 i = i + 1
 
     def is_new_player(self,player_data):
