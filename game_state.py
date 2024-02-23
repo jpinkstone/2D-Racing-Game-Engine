@@ -22,8 +22,8 @@ class GameState:
             self.mapMask = "track_mask.png"
             self.playerSprites = ["race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
             self.dimensions = (1920*0.75, 1080*0.75)
-            self.gameTime = None
-            self.lastTime = None
+            self.gameTime = 0
+            self.lastTime = 0
             self.firstPlace = None
             self.important_vars = ['status','lastTime','firstPlace','gameTime','cycle']
             self.time_vars = ['lastTime','firstPlace','gameTime']
@@ -69,7 +69,8 @@ class GameState:
         player_states, encoded_data = self.extract_player_states(encoded_data)
         decoded_data = encoded_data.split(self.delimiter)
         # Unpack the game state variables
-        self.unpack_game_state(decoded_data)
+        if self.isServer == False:
+            self.unpack_game_state(decoded_data)
         
         # Unpack variables for every player
         for player_data in player_states:
@@ -116,7 +117,10 @@ class GameState:
             new_player = PlayerGameState(60, 60)
             new_player_var_names = vars(new_player)
             for name, value in zip(new_player_var_names, new_player_var_values):
-                exec(f'new_player.{name} = {value}')
+                if name == "sprite_id":
+                    exec(f'new_player.{name} = "{value}"')
+                else:
+                    exec(f'new_player.{name} = {value}')
             self.players[id] = new_player
         except KeyError:
             print("Player not found")
@@ -135,7 +139,10 @@ class GameState:
             player = self.players[id]
             player_var_names = vars(player)
             for name, value in zip(player_var_names, player_var_values):
-                exec(f'player.{name} = {value}')
+                if name == "sprite_id":
+                    exec(f'player.{name} = "{value}"')
+                else:
+                    exec(f'player.{name} = {value}')
             self.players[id] = player
         except KeyError:
             print("Player not found")
