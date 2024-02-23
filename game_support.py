@@ -1,5 +1,10 @@
 from game_engine import *
 
+SPRITE_GREEN = "race_car2.png"
+SPRITE_RED = "race_car0.png"
+SPRITE_BLUE = "race_car3.png"
+SPRITE_PINK = "race_car1.png"
+
 def getInput():
     actions = []
     moved = False
@@ -37,7 +42,6 @@ def getInput():
 
 def cycle(engine, state, userData):
     if state.cycle == "menu": menu_state(engine, state, userData)
-    elif state.cycle == "startup": startup_state(engine, state, userData)
     elif state.cycle == "game": game_state(engine, state, userData)
     elif state.cycle == "done": done_state(engine, state, userData)
     elif state.cycle == "quit": quit_state(engine, state, userData)
@@ -50,34 +54,26 @@ def menu_state(engine, state, userData):
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.25, "assets/paladins.ttf", 20, (255, 255, 255), "Press Enter to Start")
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.1, "assets/paladins.ttf", 15, (255, 255, 255), "Connected Players: " + str(len(state.players)))
     if EVENT_ENTER in userData:
-        state.cycle = "startup"
+        state.cycle = "game"
     elif EVENT_QUIT in userData:
         state.status = "stopped"
         print("Exiting...")
 
-def loadData(engine, state):
-    player = PlayerGameState(60, 60)
-    engine.addPlayer(state, state.player_id, player)
-    audio.startMusic()
-    assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
-    engine.loadAssets(assets)
-
-def startup_state(engine, state, userData):
-    engine.clear()
-    loadData(engine,state)
-    engine.setGameTime(state, 180)
-    engine.setLastTime(state, int(datetime.datetime.today().timestamp()))
-    state.cycle = "game"
-
-
-
 def game_state(engine, state, userData):
+    if state.startup == False:
+        engine.clear()
+        player = PlayerGameState(60, 60)
+        player.sprite_id = state.sprite_id
+        engine.addPlayer(state, state.player_id, player)
+        audio.startMusic()
+        assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
+        engine.loadAssets(assets)
+        engine.setGameTime(state, 180)
+        engine.setLastTime(state, int(datetime.datetime.today().timestamp()))
+        state.startup = True
+
     engine.clear()
-    try:
-        map_mask = engine.addMap("track.png", "track_mask.png", state.dimensions)
-    except:
-        loadData(engine,state)
-        map_mask = engine.addMap("track.png", "track_mask.png", state.dimensions)
+    map_mask = engine.addMap("track.png", "track_mask.png", state.dimensions)
     for id in state.players.keys():
         player_mask = engine.placePlayer(state.players[id], (state.players[id].dimensions[0], state.players[id].dimensions[1]))
 
@@ -86,7 +82,7 @@ def game_state(engine, state, userData):
     engine.handle_actions(state, userData)
 
     engine.addText(state.dimensions[0]-200, 25, "assets/paladins.ttf", 17, (0, 0, 0), "Time left: " + str(state.gameTime))
-    if int(datetime.datetime.today().timestamp()) > state.lastTime:
+    if int(datetime.datetime.today().timestamp()) > int(state.lastTime):
         engine.setLastTime(state, int(datetime.datetime.today().timestamp()))
         engine.decreaseGameTime(state, 1)
     if state.gameTime <= 0:
@@ -105,7 +101,7 @@ def done_state(engine, state, userData):
         state.status = "stopped"
         print("Exiting...")
     elif EVENT_RESTART in userData:
-        state.cycle = "startup"
+        state.cycle = "menu"
 
 def quit_state(engine, state, userData):
     engine.clear()
