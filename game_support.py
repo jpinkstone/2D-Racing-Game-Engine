@@ -51,9 +51,14 @@ def menu_state(engine, state, userData):
     engine.loadAssets(["splash.jpg"])
     engine.addSplash("splash.jpg", state.dimensions)
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.35, "assets/paladins.ttf", 55, (255, 255, 255), "Tiny Turismo")
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.25, "assets/paladins.ttf", 20, (255, 255, 255), "Press Enter to Start")
+    if state.isServer:
+        engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.2, "assets/paladins.ttf", 20, (255, 255, 255), "You are the Server")
+        engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.25, "assets/paladins.ttf", 20, (255, 255, 255), "Press Enter to Start")
+    else:
+        engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.2, "assets/paladins.ttf", 20, (255, 255, 255), "You are a client")
+        engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.25, "assets/paladins.ttf", 20, (255, 255, 255), "Waiting for Server to Start")
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.1, "assets/paladins.ttf", 15, (255, 255, 255), "Connected Players: " + str(len(state.players)))
-    if EVENT_ENTER in userData:
+    if EVENT_ENTER in userData and state.isServer:
         state.cycle = "game"
     elif EVENT_QUIT in userData:
         state.status = "stopped"
