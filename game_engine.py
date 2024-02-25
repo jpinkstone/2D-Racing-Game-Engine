@@ -5,6 +5,7 @@ import select
 import math
 import sys
 import datetime
+import random
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
@@ -21,18 +22,6 @@ EVENT_RESTART = "restart"
 EVENT_ENTER = "enter"
 EVENT_QUIT = "quit"
 EVENT_COLLISION = "collision"
-
-Path = [
-    (778, 689), (960, 686), (1158, 689), (1251, 672), 
-    (1194, 576), (1130, 512), (1200, 455), (1286, 379), (1248, 334),
-    (1149, 321), (1100, 259), (1156, 198), (1241, 157), (1276, 101),
-    (1232, 63), (1149, 51), (887, 63), (644, 55), (507, 96),
-    (502, 167), (636, 231), (816, 306), (967, 420), (969, 509),
-    (864, 516), (722, 476), (558, 370), (389, 226), (235, 124),
-    (167, 72), (120, 99), (101, 174), (124, 249), (200, 311),
-    (270, 372), (261, 462), (160, 523), (127, 578), (155, 648),
-    (226, 696), (379, 708), (558, 689)
-]
 
 mixer.init()
 accel_sound = pygame.mixer.Sound(os.path.join("assets", "Recording.wav"))
@@ -70,12 +59,6 @@ class GameEngine():
     def addMap(self, map, map_mask, dimensions):
         scaled = pygame.transform.scale(self.assets[map], dimensions)
         self.screen.blit(scaled, (0, 0))
-
-        # Shows AI path
-        point_surface = pygame.Surface((10, 10))
-        point_surface.fill((0, 0, 255))  # Blue color
-        for point in Path:
-            self.screen.blit(point_surface, point)
 
         scaled_mask = pygame.transform.scale(self.assets[map_mask], dimensions)
         mask = pygame.mask.from_surface(scaled_mask)
@@ -182,12 +165,12 @@ class GameEngine():
         state.gameTime -= num
     
 class PlayerAI(PlayerGameState):
-    def __init__(self, path=[]):
+    def __init__(self, path, velocity, max_velocity):
         super().__init__()
         self.path = path
         self.current_waypoint = None
-        self.vel = 1
-        self.max_vel = 5
+        self.vel = velocity
+        self.max_vel = max_velocity
         self.player_angle = 90
         self.angle_increment = 10
 
