@@ -70,6 +70,7 @@ def menu_state(engine, state, userData):
         engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.2, "assets/paladins.ttf", 20, (255, 255, 255), "You are a client")
         engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.25, "assets/paladins.ttf", 20, (255, 255, 255), "Waiting for Server to Start")
     engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.1, "assets/paladins.ttf", 15, (255, 255, 255), "Connected Players: " + str(len(state.players)))
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.07, "assets/paladins.ttf", 15, (255, 255, 255), "AI Players: " + str(3-len(state.players)))
     if EVENT_ENTER in userData and state.isServer:
         state.cycle = "game"
     elif EVENT_QUIT in userData:
@@ -78,15 +79,15 @@ def menu_state(engine, state, userData):
 
 def game_state(engine, state, userData):
     if state.startup == False:
-        engine.clear()
         player = PlayerGameState(60, 60)
         player.sprite_id = state.sprite_id
         engine.addPlayer(state, state.player_id, player)
+        random.seed()
         if state.isServer:
-            # for _ in range(4-len(state.players)):
-            playerAI = PlayerAI(Path) 
-            playerAI.sprite_id = SPRITE_PINK
-            engine.addPlayerAI(state, playerAI)
+            for _ in range(4-len(state.players)):
+                playerAI = PlayerAI(Path, random.uniform(0.1, 0.9), random.uniform(1, 7))
+                playerAI.sprite_id = SPRITE_PINK
+                engine.addPlayerAI(state, playerAI)
         audio.startMusic()
         assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
         engine.loadAssets(assets)
