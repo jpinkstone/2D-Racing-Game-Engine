@@ -5,6 +5,18 @@ SPRITE_RED = "race_car0.png"
 SPRITE_BLUE = "race_car3.png"
 SPRITE_PINK = "race_car1.png"
 
+Path = [
+    (778, 689), (960, 686), (1158, 689), (1251, 672), 
+    (1194, 576), (1130, 512), (1200, 455), (1286, 379), (1248, 334),
+    (1149, 321), (1100, 259), (1156, 198), (1241, 157), (1276, 101),
+    (1232, 63), (1149, 51), (887, 63), (644, 55), (507, 96),
+    (502, 167), (636, 231), (816, 306), (967, 420), (969, 509),
+    (864, 516), (722, 476), (558, 370), (389, 226), (235, 124),
+    (167, 72), (120, 99), (101, 174), (124, 249), (200, 311),
+    (270, 372), (261, 462), (160, 523), (127, 578), (155, 648),
+    (226, 696), (379, 708), (558, 689)
+]
+
 def getInput():
     actions = []
     moved = False
@@ -70,6 +82,11 @@ def game_state(engine, state, userData):
         player = PlayerGameState(60, 60)
         player.sprite_id = state.sprite_id
         engine.addPlayer(state, state.player_id, player)
+        if state.isServer:
+            # for _ in range(4-len(state.players)):
+            playerAI = PlayerAI(Path) 
+            playerAI.sprite_id = SPRITE_PINK
+            engine.addPlayerAI(state, playerAI)
         audio.startMusic()
         assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
         engine.loadAssets(assets)
@@ -85,6 +102,11 @@ def game_state(engine, state, userData):
     if engine.getCollisions(map_mask, state.players[state.player_id], player_mask, state):
             engine.bounce(state)
     engine.handle_actions(state, userData)
+
+    if state.isServer:
+        for id in range(len(state.playersAI)):
+            player_mask = engine.placePlayer(state.playersAI[id], (state.playersAI[id].dimensions[0], state.playersAI[id].dimensions[1]))
+            state.playersAI[id].follow_waypoints()
 
     engine.addText(state.dimensions[0]-200, 25, "assets/paladins.ttf", 17, (0, 0, 0), "Time left: " + str(state.gameTime))
     if int(datetime.datetime.today().timestamp()) > int(state.lastTime):

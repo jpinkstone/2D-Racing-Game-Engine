@@ -8,13 +8,13 @@ from game_state import *
 from game_engine import *
 from game_support import *
 
-sprite = SPRITE_RED
+sprite = SPRITE_GREEN
 isServer = True
 serverIp = "127.0.0.1"
 port = 60217
 
 if isServer:
-    net = networking("server", "127.0.0.1", port)
+    net = networking("server", serverIp, port)
 else:
     net = networking("client", serverIp, port)
 

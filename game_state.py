@@ -11,6 +11,7 @@ class GameState:
         try:
             self.title = "Tiny Turismo"
             self.players = {}
+            self.playersAI = []
             self.delimiter = "|"
             self.status = "running"
             self.cycle = "menu"
@@ -152,7 +153,7 @@ class GameState:
 
 
 class PlayerGameState:
-    def __init__(self, width, height):
+    def __init__(self, width=60, height=60):
         # Player car info
         self.dimensions = (width, height)
         self.player_x = 600

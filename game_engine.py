@@ -22,6 +22,18 @@ EVENT_ENTER = "enter"
 EVENT_QUIT = "quit"
 EVENT_COLLISION = "collision"
 
+Path = [
+    (778, 689), (960, 686), (1158, 689), (1251, 672), 
+    (1194, 576), (1130, 512), (1200, 455), (1286, 379), (1248, 334),
+    (1149, 321), (1100, 259), (1156, 198), (1241, 157), (1276, 101),
+    (1232, 63), (1149, 51), (887, 63), (644, 55), (507, 96),
+    (502, 167), (636, 231), (816, 306), (967, 420), (969, 509),
+    (864, 516), (722, 476), (558, 370), (389, 226), (235, 124),
+    (167, 72), (120, 99), (101, 174), (124, 249), (200, 311),
+    (270, 372), (261, 462), (160, 523), (127, 578), (155, 648),
+    (226, 696), (379, 708), (558, 689)
+]
+
 mixer.init()
 accel_sound = pygame.mixer.Sound(os.path.join("assets", "Recording.wav"))
 accel_sound.set_volume(0.2)
@@ -58,6 +70,12 @@ class GameEngine():
     def addMap(self, map, map_mask, dimensions):
         scaled = pygame.transform.scale(self.assets[map], dimensions)
         self.screen.blit(scaled, (0, 0))
+
+        # Shows AI path
+        point_surface = pygame.Surface((10, 10))
+        point_surface.fill((0, 0, 255))  # Blue color
+        for point in Path:
+            self.screen.blit(point_surface, point)
 
         scaled_mask = pygame.transform.scale(self.assets[map_mask], dimensions)
         mask = pygame.mask.from_surface(scaled_mask)
@@ -134,11 +152,9 @@ class GameEngine():
         temp_player = state.players[state.player_id]
         radians = math.radians(temp_player.player_angle)
         
-        # Calculate the components based on player's velocity without the negative sign
         vertical = math.cos(radians) * temp_player.vel
         horizontal = math.sin(radians) * temp_player.vel
 
-        # Update player's position
         temp_player.player_x += horizontal
         temp_player.player_y += vertical
 
@@ -152,6 +168,9 @@ class GameEngine():
 
     def addPlayer(self, state, ID, player):
         state.players[ID] = player
+
+    def addPlayerAI(self, state, player):
+        state.playersAI.append(player)
     
     def setGameTime(self, state, seconds):
         state.gameTime = seconds
@@ -162,58 +181,61 @@ class GameEngine():
     def decreaseGameTime(self, state, num):
         state.gameTime -= num
     
-class PlayerAI(GameEngine):
-    def __init__(self, max_vel, rotation_vel, path=[]):
-        try:
-            super().__init__(max_vel, rotation_vel)
-            self.path = path
-            self.current_point = 0
-            self.vel = max_vel
-        except:
-            print("Initilization of PlayerAI Failed.")
+class PlayerAI(PlayerGameState):
+    def __init__(self, path=[]):
+        super().__init__()
+        self.path = path
+        self.current_waypoint = None
+        self.vel = 1
+        self.max_vel = 5
+        self.player_angle = 90
+        self.angle_increment = 10
 
-    def draw_points(self, win):
-        for point in self.path:
-            pygame.draw.circle(win, (255, 0, 0), point, 5)
+    def follow_waypoints(self):
+        if not self.current_waypoint:
+            self.current_waypoint = self.path[0]
 
-    def draw(self, win):
-        super().draw(win)
-        # self.draw_points(win)
+        if self.distance_to_waypoint() < 5:
+            self.current_waypoint = self.path[(self.path.index(self.current_waypoint) + 1) % len(self.path)]
+            # print("cur waypoint " + str(self.current_waypoint[0]) +  " "  + str(self.current_waypoint[1]))
+        self.move_towards(self.current_waypoint)
 
-    def calculate_angle(self):
-        target_x, target_y = self.path[self.current_point]
-        x_diff = target_x - self.x
-        y_diff = target_y - self.y
-        if y_diff == 0:
-            desired_radian_angle = math.pi / 2
-        else:
-            desired_radian_angle = math.atan(x_diff / y_diff)
+    def distance_to_waypoint(self):
+        if self.current_waypoint:
+            # dist = math.sqrt((self.current_waypoint[0] - self.player_x)**2 + (self.current_waypoint[1] - self.player_y)**2)
+            # print(dist)
+            return math.sqrt((self.current_waypoint[0] - self.player_x)**2 + (self.current_waypoint[1] - self.player_y)**2)
+        return float('inf')
 
-        if target_y > self.y:
-            desired_radian_angle += math.pi
+    def move_towards(self, waypoint):
+        angle_to_target = math.atan2(waypoint[0] - self.player_x, waypoint[1] - self.player_y)
+        angle_difference = math.degrees(angle_to_target) - self.player_angle
 
-        difference_in_angle = self.angle - math.degrees(desired_radian_angle)
-        if difference_in_angle >= 180:
-            difference_in_angle -= 360
+        if angle_difference > 180:
+            angle_difference -= 360
+        elif angle_difference < -180:
+            angle_difference += 360
 
-        if difference_in_angle > 0:
-            self.angle -= min(self.rotation_vel, abs(difference_in_angle))
-        else:
-            self.angle += min(self.rotation_vel, abs(difference_in_angle))
+        rotation_direction = 1 if angle_difference > 0 else -1
+        rotation_amount = min(abs(angle_difference), self.angle_increment)
 
-    def update_path_point(self):
-        target = self.path[self.current_point]
-        rect = pygame.Rect(
-            self.x, self.y, self.img.get_width(), self.img.get_height())
-        if rect.collidepoint(*target):
-            self.current_point += 1
+        self.rotate(rotation_direction * rotation_amount)
+        self.forward()
+
+    def forward(self):
+        self.vel = min(self.vel + self.acceleration, self.max_vel)
+        self.move()
+
+    def rotate(self, angle_difference):
+        self.player_angle += angle_difference
+
     def move(self):
-        if self.current_point >= len(self.path):
-            return
+        radians = math.radians(self.player_angle)
+        vertical = math.cos(radians) * self.vel
+        horizontal = math.sin(radians) * self.vel
 
-        self.calculate_angle()
-        self.update_path_point()
-        super().move()
+        self.player_x += horizontal
+        self.player_y += vertical
 
 class networking():
     # Initialize networking variables
