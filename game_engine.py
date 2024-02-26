@@ -10,6 +10,7 @@ import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from pygame import mixer
+from game_state import *
 
 EVENT_ACCELF = "accelF"
 EVENT_ACCELB = "accelB"
@@ -22,12 +23,6 @@ EVENT_RESTART = "restart"
 EVENT_ENTER = "enter"
 EVENT_QUIT = "quit"
 EVENT_COLLISION = "collision"
-
-mixer.init()
-accel_sound = pygame.mixer.Sound(os.path.join("assets", "Recording.wav"))
-accel_sound.set_volume(0.2)
-
-from game_state import *
 
 class GameEngine():
     def __init__(self, state):
@@ -111,13 +106,13 @@ class GameEngine():
 
     def forward(self, state):
         temp_player = state.players[state.player_id]
-        audio.accelerateSound()
+        audio.accelerateSound("accelerate.wav", 0.2)
         temp_player.vel = min(temp_player.vel + temp_player.acceleration, temp_player.max_vel)
         self.move(state)
 
     def backward(self, state):
         temp_player = state.players[state.player_id]
-        audio.accelerateSound()
+        audio.accelerateSound("accelerate.wav", 0.2)
         temp_player.vel = min(temp_player.vel - temp_player.acceleration, -temp_player.max_vel/2)
         self.move(state)
 
@@ -330,9 +325,15 @@ class networking():
         self.sock.close()
 
 class audio(GameEngine):
+    def init():
+        mixer.init()
+
     def startMusic():
         pass
-    def accelerateSound():
+
+    def accelerateSound(file, volume):
+        accel_sound = pygame.mixer.Sound(os.path.join("assets", file))
+        accel_sound.set_volume(volume)
         pygame.mixer.Sound.play(accel_sound)
 
 class physics(GameEngine):
