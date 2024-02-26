@@ -168,6 +168,7 @@ class PlayerAI(PlayerGameState):
     def __init__(self, path, velocity, max_velocity):
         super().__init__()
         self.path = path
+        self.id = None
         self.current_waypoint = None
         self.vel = velocity
         self.max_vel = max_velocity
