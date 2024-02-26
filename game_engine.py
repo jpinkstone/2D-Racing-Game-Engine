@@ -1,6 +1,4 @@
 import socket
-import threading
-import queue
 import select
 import math
 import sys
