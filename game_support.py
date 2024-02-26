@@ -84,9 +84,10 @@ def game_state(engine, state, userData):
         engine.addPlayer(state, state.player_id, player)
         random.seed()
         if state.isServer:
-            for _ in range(4-len(state.players)):
+            for x in range(4-len(state.players)):
                 playerAI = PlayerAI(Path, random.uniform(0.1, 0.9), random.uniform(1, 7))
                 playerAI.sprite_id = SPRITE_PINK
+                playerAI.id = x+1
                 engine.addPlayerAI(state, playerAI)
         audio.startMusic()
         assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
