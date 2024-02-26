@@ -89,6 +89,7 @@ def game_state(engine, state, userData):
                 playerAI.sprite_id = SPRITE_PINK
                 playerAI.id = x+1
                 engine.addPlayerAI(state, playerAI)
+        audio.init()
         audio.startMusic()
         assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
         engine.loadAssets(assets)
