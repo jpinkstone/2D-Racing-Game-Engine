@@ -26,7 +26,7 @@ class GameState:
             self.gameTime = 0
             self.lastTime = 0
             self.firstPlace = None
-            self.important_vars = ['status','lastTime','firstPlace','gameTime','cycle']
+            self.network_vars = ['status','lastTime','firstPlace','gameTime','cycle']
             self.time_vars = ['lastTime','firstPlace','gameTime']
         except:
             print("Initilization of Game State Failed.")
@@ -35,7 +35,8 @@ class GameState:
         encoded_data = ""
 
         # Pack the game state variables
-        encoded_data += self.pack_game_state()
+        if self.isServer:
+            encoded_data += self.pack_game_state()
         
         # Pack variables for local player
         if self.players:
@@ -46,33 +47,59 @@ class GameState:
         else:
             encoded_data += "{" + str(self.player_id) + "}"
 
+        if self.isServer:
+            for ai in self.playersAI:
+                encoded_data += self.pack_ai(ai)
+
         return encoded_data
     
+    # Pack the game state variables
     def pack_game_state(self):
         encoded_data = ""
         game_state_vars = vars(self)
         
-        # Pack the game state variables
         for key in game_state_vars.keys():
-            if key in self.important_vars: 
+            if key in self.network_vars: 
                 encoded_data += str(game_state_vars[key]) + self.delimiter
         return encoded_data
 
+    # Pack the player state variables
     def pack_player_state(self,id,player):
         encoded_data = "{" + str(id) + self.delimiter
         player_data = vars(player)
         
         for var in player_data:
-            encoded_data += str(player_data[var]) + self.delimiter
+            if var in player.network_vars:
+                encoded_data += str(player_data[var]) + self.delimiter
         encoded_data += "}"
+        return encoded_data
+    
+    # Pack the AI state variables
+    def pack_ai(self,ai):
+        encoded_data = "["
+        ai_data = vars(ai)
+        for var in ai_data:
+            if var in ai.network_vars:
+                encoded_data += str(ai_data[var]) + self.delimiter
+
+        encoded_data += "]"
         return encoded_data
 
     def unpack(self,encoded_data):
         player_states, encoded_data = self.extract_player_states(encoded_data)
+        ai_states, encoded_data = self.extract_ai_states(encoded_data)
         decoded_data = encoded_data.split(self.delimiter)
         # Unpack the game state variables
         if self.isServer == False:
             self.unpack_game_state(decoded_data)
+            i = 0
+            for ai_data in ai_states:
+                if len(self.playersAI) < i + 1:
+                    self.unpack_new_ai(ai_data)
+                else:
+                    self.unpack_ai(ai_data, i)
+                i = i + 1
+
         
         # Unpack variables for every player
         for player_data in player_states:
@@ -87,12 +114,57 @@ class GameState:
         matches = re.findall(pattern, encoded_data)
         result_string = re.sub(pattern, '', encoded_data)
         return matches, result_string
+    
+    # Returns a list of undelimited AI data for all AI players
+    def extract_ai_states(self,encoded_data):
+        pattern = r'\[([^\]]*)\]'  # Regular expression to match content within square brackets
+        matches = re.findall(pattern, encoded_data)
+        result_string = re.sub(pattern, '', encoded_data)
+        return matches, result_string
+    
+    def unpack_new_ai(self,ai_data):
+        new_ai_var_values = ai_data.split(self.delimiter)
+        try:    
+            new_ai = PlayerGameState(60,60)
+            ai_var_names = vars(new_ai)
+            for name, value in zip(new_ai.network_vars, new_ai_var_values):
+                if name == "sprite_id":
+                    exec(f'new_ai.{name} = "{value}"')
+                else:
+                    exec(f'new_ai.{name} = {value}')
+            self.playersAI.append(new_ai)
+        except KeyError:
+            print("AI not found")
+        except Exception as e:
+            print(f"Error unpacking new AI: {e}")
+        except:
+            pass
+
+    
+    def unpack_ai(self,ai_data,index):
+        new_ai_var_values = ai_data.split(self.delimiter)
+        ai = self.playersAI[index]
+
+        try:
+            ai_var_names = vars(ai)
+            for name, value in zip(ai.network_vars, new_ai_var_values):
+                if name == "sprite_id":
+                    exec(f'ai.{name} = "{value}"')
+                else:
+                    exec(f'ai.{name} = {value}')
+            self.playersAI[index] = ai
+        except KeyError:
+            print("AI not found")
+        except Exception as e:
+            print(f"Error unpacking AI: {e}")
+        except:
+            pass
 
     def unpack_game_state(self,decoded_data):
         game_state_vars = vars(self)
         i = 0
         for key in game_state_vars.keys():
-            if key in self.important_vars:
+            if key in self.network_vars:
                 value = decoded_data[i]
                 if key in self.time_vars and value != 'None':
                     value = int(value)
@@ -139,12 +211,12 @@ class GameState:
 
         try:    
             player = self.players[id]
-            player_var_names = vars(player)
-            for name, value in zip(player_var_names, player_var_values):
-                if name == "sprite_id":
-                    exec(f'player.{name} = "{value}"')
+            player_var_names = player.network_vars
+            for var, value in zip(player_var_names, player_var_values):
+                if var == "sprite_id":
+                    exec(f'player.{var} = "{value}"')
                 else:
-                    exec(f'player.{name} = {value}')
+                    exec(f'player.{var} = {value}')
             self.players[id] = player
         except KeyError:
             print("Player not found")
@@ -166,3 +238,4 @@ class PlayerGameState:
         self.max_vel = MAX_VELOCITY
         self.acceleration = ACCELERATION_FACTOR
         self.angle_increment = ROTATION_INCREMENT
+        self.network_vars = ['player_x','player_y','score','sprite_id','player_angle']
