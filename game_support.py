@@ -85,7 +85,7 @@ def game_state(engine, state, userData):
         random.seed()
         if state.isServer:
             for x in range(4-len(state.players)):
-                playerAI = PlayerAI(Path, random.uniform(0.1, 0.9), random.uniform(1, 7))
+                playerAI = PlayerAI(Path, random.uniform(0.1, 0.9), random.uniform(2, 5))
                 playerAI.sprite_id = SPRITE_PINK
                 playerAI.id = x+1
                 engine.addPlayerAI(state, playerAI)
