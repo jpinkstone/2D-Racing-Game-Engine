@@ -106,9 +106,10 @@ def game_state(engine, state, userData):
             engine.bounce(state)
     engine.handle_actions(state, userData)
 
-    if state.isServer:
-        for id in range(len(state.playersAI)):
-            player_mask = engine.placePlayer(state.playersAI[id], (state.playersAI[id].dimensions[0], state.playersAI[id].dimensions[1]))
+    
+    for id in range(len(state.playersAI)):
+        player_mask = engine.placePlayer(state.playersAI[id], (state.playersAI[id].dimensions[0], state.playersAI[id].dimensions[1]))
+        if state.isServer:
             state.playersAI[id].follow_waypoints()
 
     engine.addText(state.dimensions[0]-200, 25, "assets/paladins.ttf", 17, (0, 0, 0), "Time left: " + str(state.gameTime))

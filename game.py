@@ -8,8 +8,8 @@ from game_state import *
 from game_engine import *
 from game_support import *
 
-sprite = SPRITE_GREEN
-isServer = True
+sprite = SPRITE_RED
+isServer = False
 serverIp = "127.0.0.1"
 port = 60217
 
@@ -32,6 +32,7 @@ while (state.status != "stopped"):
     networkData = net.receive()       # Receive connected player data and update game
     if networkData != None:
         state.unpack(networkData)
+    print(state.playersAI)
 
     cycle(engine, state, userData)    # Update the game cycle
 
