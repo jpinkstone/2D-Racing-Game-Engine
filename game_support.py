@@ -56,7 +56,6 @@ def cycle(engine, state, userData):
     if state.cycle == "menu": menu_state(engine, state, userData)
     elif state.cycle == "game": game_state(engine, state, userData)
     elif state.cycle == "done": done_state(engine, state, userData)
-    elif state.cycle == "quit": quit_state(engine, state, userData)
 
 def menu_state(engine, state, userData):
     engine.screenFill((200, 200, 200))
@@ -105,7 +104,6 @@ def game_state(engine, state, userData):
     if engine.getCollisions(map_mask, state.players[state.player_id], player_mask, state):
             engine.bounce(state)
     engine.handle_actions(state, userData)
-
     
     for id in range(len(state.playersAI)):
         if id > 4 - len(state.players): break
@@ -126,19 +124,14 @@ def game_state(engine, state, userData):
 def done_state(engine, state, userData):
     engine.clear()
     engine.screenFill((200, 200, 200))
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/2, "assets/paladins.ttf", 32, (0, 0, 0), "Player " + state.firstPlace + " wins!")
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'q' to exit game")
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'r' to restart game")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Player " + str(state.firstPlace) + " wins!")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.2, "assets/paladins.ttf", 20, (0, 0, 0), "Press 'q' to exit game")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.25, "assets/paladins.ttf", 20, (0, 0, 0), "Press 'r' to restart game")
     if EVENT_QUIT in userData:
         state.status = "stopped"
         print("Exiting...")
     elif EVENT_RESTART in userData:
+        state.startup = False
+        state.players.clear()
+        state.playersAI.clear()
         state.cycle = "menu"
-
-def quit_state(engine, state, userData):
-    engine.clear()
-    engine.screenFill((200, 200, 200))
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'q' to exit game")
-    if EVENT_QUIT in userData:
-        state.status = "stopped"
-        print("Exiting...")
