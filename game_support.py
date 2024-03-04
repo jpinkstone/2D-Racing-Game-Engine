@@ -108,6 +108,7 @@ def game_state(engine, state, userData):
 
     
     for id in range(len(state.playersAI)):
+        if id > 4 - len(state.players): break
         player_mask = engine.placePlayer(state.playersAI[id], (state.playersAI[id].dimensions[0], state.playersAI[id].dimensions[1]))
         if state.isServer:
             state.playersAI[id].follow_waypoints()

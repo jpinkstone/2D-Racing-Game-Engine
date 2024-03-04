@@ -89,17 +89,16 @@ class GameState:
         player_states, encoded_data = self.extract_player_states(encoded_data)
         ai_states, encoded_data = self.extract_ai_states(encoded_data)
         decoded_data = encoded_data.split(self.delimiter)
+
         # Unpack the game state variables
         if self.isServer == False:
             self.unpack_game_state(decoded_data)
-            i = 0
-            for ai_data in ai_states:
-                if len(self.playersAI) < i + 1:
-                    self.unpack_new_ai(ai_data)
+            for i in range(len(ai_states)):
+                if i > 3: break
+                if i + 1 > len(self.playersAI):
+                    self.unpack_new_ai(ai_states[i])
                 else:
-                    self.unpack_ai(ai_data, i)
-                i = i + 1
-
+                    self.unpack_ai(ai_states[i], i)
         
         # Unpack variables for every player
         for player_data in player_states:
@@ -126,7 +125,6 @@ class GameState:
         new_ai_var_values = ai_data.split(self.delimiter)
         try:    
             new_ai = PlayerGameState(60,60)
-            ai_var_names = vars(new_ai)
             for name, value in zip(new_ai.network_vars, new_ai_var_values):
                 if name == "sprite_id":
                     exec(f'new_ai.{name} = "{value}"')
