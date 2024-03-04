@@ -8,7 +8,11 @@ from game_state import *
 from game_engine import *
 from game_support import *
 
+<<<<<<< Updated upstream
 sprite = SPRITE_GREEN
+=======
+sprite = SPRITE_RED
+>>>>>>> Stashed changes
 isServer = True
 serverIp = "127.0.0.1"
 port = 60217

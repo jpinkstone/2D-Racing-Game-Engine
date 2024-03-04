@@ -104,13 +104,20 @@ def game_state(engine, state, userData):
     if engine.getCollisions(map_mask, state.players[state.player_id], player_mask, state):
             engine.bounce(state)
     engine.handle_actions(state, userData)
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
     for id in range(len(state.playersAI)):
         if id > 4 - len(state.players): break
         player_mask = engine.placePlayer(state.playersAI[id], (state.playersAI[id].dimensions[0], state.playersAI[id].dimensions[1]))
         if state.isServer:
             state.playersAI[id].follow_waypoints()
 
+    if state.isServer:
+        engine.updateCarPositions(state, Path)
+        
     engine.addText(state.dimensions[0]-200, 25, "assets/paladins.ttf", 17, (0, 0, 0), "Time left: " + str(state.gameTime))
     if int(datetime.datetime.today().timestamp()) > int(state.lastTime):
         engine.setLastTime(state, int(datetime.datetime.today().timestamp()))

@@ -12,6 +12,8 @@ class GameState:
             self.title = "Tiny Turismo"
             self.players = {}
             self.playersAI = []
+            self.car_order = []
+            self.player_names = {}
             self.delimiter = "|"
             self.status = "running"
             self.cycle = "menu"
