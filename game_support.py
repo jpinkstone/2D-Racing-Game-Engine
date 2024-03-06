@@ -4,6 +4,7 @@ SPRITE_GREEN = "race_car2.png"
 SPRITE_RED = "race_car0.png"
 SPRITE_BLUE = "race_car3.png"
 SPRITE_PINK = "race_car1.png"
+CHECKPOINT_INDEX = 20
 
 Path = [
     (778, 689), (960, 686), (1158, 689), (1251, 672), 
@@ -111,7 +112,8 @@ def game_state(engine, state, userData):
             state.playersAI[id].follow_waypoints()
 
     if state.isServer:
-        engine.updateCarPositions(state, Path)
+        if engine.updateCarPositions(state, Path, CHECKPOINT_INDEX):
+            state.cycle = "done"
         
     engine.addText(state.dimensions[0]-150, 25, "assets/paladins.ttf", 17, (255, 255, 255), "Time left: " + str(state.gameTime))
     engine.addText(state.dimensions[0]-1300, 25, "assets/paladins.ttf", 17, (255, 255, 255), "Leaderboard")
