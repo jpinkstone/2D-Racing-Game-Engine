@@ -28,7 +28,7 @@ class GameState:
             self.gameTime = 0
             self.lastTime = 0
             self.firstPlace = 0
-            self.network_vars = ['status','lastTime','firstPlace','gameTime','cycle']
+            self.network_vars = ['status','car_order','lastTime','firstPlace','gameTime','cycle']
             self.time_vars = ['lastTime','firstPlace','gameTime']
         except:
             print("Initilization of Game State Failed.")
@@ -84,13 +84,13 @@ class GameState:
     
     # Pack the AI state variables
     def pack_ai(self,ai):
-        encoded_data = "["
+        encoded_data = "("
         ai_data = vars(ai)
         for var in ai_data:
             if var in ai.network_vars:
                 encoded_data += str(ai_data[var]) + self.delimiter
 
-        encoded_data += "]"
+        encoded_data += ")"
         return encoded_data
 
     def unpack(self,encoded_data):
@@ -123,8 +123,8 @@ class GameState:
         return matches, result_string
     
     # Returns a list of undelimited AI data for all AI players
-    def extract_ai_states(self,encoded_data):
-        pattern = r'\[([^\]]*)\]'  # Regular expression to match content within square brackets
+    def extract_ai_states(self, encoded_data):
+        pattern = r'\(([^)]*)\)'  # Updated regular expression to match content within parentheses
         matches = re.findall(pattern, encoded_data)
         result_string = re.sub(pattern, '', encoded_data)
         return matches, result_string
@@ -174,6 +174,10 @@ class GameState:
                 value = decoded_data[i]
                 if key in self.time_vars and value != 'None':
                     value = int(value)
+                if key == "car_order":
+                    exec(f'self.{key} = {value}')
+                    i = i + 1
+                    continue
                 setattr(self,key,value)
                 i = i + 1
 
@@ -202,6 +206,7 @@ class GameState:
                 else:
                     exec(f'new_player.{name} = {value}')
             self.players[id] = new_player
+            self.player_names[id] = f'Player {len(self.players)}'
         except KeyError:
             print("Player not found")
         except Exception as e:

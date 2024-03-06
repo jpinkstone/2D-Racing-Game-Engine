@@ -115,7 +115,7 @@ def game_state(engine, state, userData):
         
     engine.addText(state.dimensions[0]-150, 25, "assets/paladins.ttf", 17, (255, 255, 255), "Time left: " + str(state.gameTime))
     engine.addText(state.dimensions[0]-1300, 25, "assets/paladins.ttf", 17, (255, 255, 255), "Leaderboard")
-    for x in range(4):
+    for x in range(len(state.car_order)):
         engine.addText(state.dimensions[0]-1300, (50 + (x*25)), "assets/paladins.ttf", 17, (255, 255, 255), str(x+1) + ". " + str(state.car_order[x]))
 
     if int(datetime.datetime.today().timestamp()) > int(state.lastTime):
