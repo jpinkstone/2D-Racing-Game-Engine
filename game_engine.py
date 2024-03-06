@@ -100,8 +100,7 @@ class GameEngine():
         sorted_cars = sorted(distances, key=lambda x: x[1], reverse=True)
         state.car_order = [state.player_names.get(int(car[0]), None) for car in sorted_cars]
         state.car_order = [car for car in state.car_order if car is not None]
-        print(state.car_order)
-
+        
     def handle_actions(self, state, actions):
         if EVENT_ACCELF in actions:
             self.forward(state)
