@@ -88,19 +88,25 @@ class GameEngine():
 
     def updateCarPositions(self, state, Path):
         distances = []
+        winner = None
 
         for id in state.players.keys():
             closest_waypoint_index = min(range(len(Path)), key=lambda i: math.sqrt((Path[i][0] - state.players[id].player_x)**2 + (Path[i][1] - state.players[id].player_y)**2))
             distances.append((id, closest_waypoint_index))
-
+            if (closest_waypoint_index == 0) and (state.gameTime <= 30):
+                winner = state.player_names.get(id, None)
+            
         for ai_player in state.playersAI:
             closest_waypoint_index = min(range(len(Path)), key=lambda i: math.sqrt((Path[i][0] - ai_player.player_x)**2 + (Path[i][1] - ai_player.player_y)**2))
             distances.append((ai_player.id, closest_waypoint_index))
+            if (closest_waypoint_index == 0) and (state.gameTime <= 30):
+                winner = state.player_names.get(int(ai_player.id), None)
             
         sorted_cars = sorted(distances, key=lambda x: x[1], reverse=True)
         state.car_order = [state.player_names.get(int(car[0]), None) for car in sorted_cars]
         state.car_order = [car for car in state.car_order if car is not None]
-        
+        return winner
+    
     def handle_actions(self, state, actions):
         if EVENT_ACCELF in actions:
             self.forward(state)

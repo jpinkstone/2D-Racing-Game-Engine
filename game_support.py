@@ -111,7 +111,9 @@ def game_state(engine, state, userData):
             state.playersAI[id].follow_waypoints()
 
     if state.isServer:
-        engine.updateCarPositions(state, Path)
+        winner_name = engine.updateCarPositions(state, Path)
+        if winner_name is not None:
+            state.cycle = "done"
         
     engine.addText(state.dimensions[0]-150, 25, "assets/paladins.ttf", 17, (255, 255, 255), "Time left: " + str(state.gameTime))
     engine.addText(state.dimensions[0]-1300, 25, "assets/paladins.ttf", 17, (255, 255, 255), "Leaderboard")
