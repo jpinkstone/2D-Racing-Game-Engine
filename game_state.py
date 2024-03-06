@@ -230,7 +230,7 @@ class PlayerGameState:
         self.dimensions = (width, height)
         self.player_x = 600
         self.player_y = 650
-        self.score = 0
+        self.checkpoint_reached = False
         self.sprite_id = None
         # Movement
         self.vel = 0
