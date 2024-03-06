@@ -326,8 +326,9 @@ class audio(GameEngine):
     def init():
         mixer.init()
 
-    def startMusic():
-        pass
+    def startMusic(file):
+        accel_sound = pygame.mixer.Sound(os.path.join("assets", file))
+        pygame.mixer.Sound.play(accel_sound)
 
     def accelerateSound(file, volume):
         accel_sound = pygame.mixer.Sound(os.path.join("assets", file))

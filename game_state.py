@@ -30,6 +30,12 @@ class GameState:
             self.time_vars = ['lastTime','firstPlace','gameTime']
         except:
             print("Initilization of Game State Failed.")
+
+    def gamestate_set_network_vars(self,list_of_var_names):
+        self.network_vars = list_of_var_names
+
+    def gamestate_set_player_sprite_files(self,list_of_sprite_files):
+        self.playerSprites = list_of_sprite_files
     
     def pack(self):
         encoded_data = ""
@@ -237,3 +243,6 @@ class PlayerGameState:
         self.acceleration = ACCELERATION_FACTOR
         self.angle_increment = ROTATION_INCREMENT
         self.network_vars = ['player_x','player_y','score','sprite_id','player_angle']
+
+    def player_set_network_vars(self,list_of_var_names):
+        self.network_vars = list_of_var_names
