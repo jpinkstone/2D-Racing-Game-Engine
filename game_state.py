@@ -12,6 +12,8 @@ class GameState:
             self.title = "Tiny Turismo"
             self.players = {}
             self.playersAI = []
+            self.car_order = []
+            self.player_names = {}
             self.delimiter = "|"
             self.status = "running"
             self.cycle = "menu"
@@ -25,7 +27,7 @@ class GameState:
             self.dimensions = (1920*0.75, 1080*0.75)
             self.gameTime = 0
             self.lastTime = 0
-            self.firstPlace = None
+            self.firstPlace = 0
             self.network_vars = ['status','lastTime','firstPlace','gameTime','cycle']
             self.time_vars = ['lastTime','firstPlace','gameTime']
         except:

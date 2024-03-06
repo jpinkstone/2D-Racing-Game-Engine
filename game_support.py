@@ -56,7 +56,6 @@ def cycle(engine, state, userData):
     if state.cycle == "menu": menu_state(engine, state, userData)
     elif state.cycle == "game": game_state(engine, state, userData)
     elif state.cycle == "done": done_state(engine, state, userData)
-    elif state.cycle == "quit": quit_state(engine, state, userData)
 
 def menu_state(engine, state, userData):
     engine.screenFill((200, 200, 200))
@@ -93,7 +92,7 @@ def game_state(engine, state, userData):
         audio.startMusic("racing-125862.mp3")
         assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
         engine.loadAssets(assets)
-        engine.setGameTime(state, 180)
+        engine.setGameTime(state, 60)
         engine.setLastTime(state, int(datetime.datetime.today().timestamp()))
         state.startup = True
 
@@ -105,15 +104,20 @@ def game_state(engine, state, userData):
     if engine.getCollisions(map_mask, state.players[state.player_id], player_mask, state):
             engine.bounce(state)
     engine.handle_actions(state, userData)
-
-    
     for id in range(len(state.playersAI)):
         if id > 4 - len(state.players): break
         player_mask = engine.placePlayer(state.playersAI[id], (state.playersAI[id].dimensions[0], state.playersAI[id].dimensions[1]))
         if state.isServer:
             state.playersAI[id].follow_waypoints()
 
-    engine.addText(state.dimensions[0]-200, 25, "assets/paladins.ttf", 17, (0, 0, 0), "Time left: " + str(state.gameTime))
+    if state.isServer:
+        engine.updateCarPositions(state, Path)
+        
+    engine.addText(state.dimensions[0]-150, 25, "assets/paladins.ttf", 17, (255, 255, 255), "Time left: " + str(state.gameTime))
+    engine.addText(state.dimensions[0]-1300, 25, "assets/paladins.ttf", 17, (255, 255, 255), "Leaderboard")
+    for x in range(4):
+        engine.addText(state.dimensions[0]-1300, (50 + (x*25)), "assets/paladins.ttf", 17, (255, 255, 255), str(x+1) + ". " + str(state.car_order[x]))
+
     if int(datetime.datetime.today().timestamp()) > int(state.lastTime):
         engine.setLastTime(state, int(datetime.datetime.today().timestamp()))
         engine.decreaseGameTime(state, 1)
@@ -126,19 +130,14 @@ def game_state(engine, state, userData):
 def done_state(engine, state, userData):
     engine.clear()
     engine.screenFill((200, 200, 200))
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/2, "assets/paladins.ttf", 32, (0, 0, 0), "Player " + state.firstPlace + " wins!")
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'q' to exit game")
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'r' to restart game")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), str(state.car_order[0]) + " wins!")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.2, "assets/paladins.ttf", 20, (0, 0, 0), "Press 'q' to exit game")
+    engine.addText(state.dimensions[0]/2, state.dimensions[1]/1.25, "assets/paladins.ttf", 20, (0, 0, 0), "Press 'r' to restart game")
     if EVENT_QUIT in userData:
         state.status = "stopped"
         print("Exiting...")
     elif EVENT_RESTART in userData:
+        state.startup = False
+        state.players.clear()
+        state.playersAI.clear()
         state.cycle = "menu"
-
-def quit_state(engine, state, userData):
-    engine.clear()
-    engine.screenFill((200, 200, 200))
-    engine.addText(state.dimensions[0]/2, state.dimensions[1]/3, "assets/paladins.ttf", 32, (0, 0, 0), "Press 'q' to exit game")
-    if EVENT_QUIT in userData:
-        state.status = "stopped"
-        print("Exiting...")

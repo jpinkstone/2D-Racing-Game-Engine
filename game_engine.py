@@ -86,6 +86,21 @@ class GameEngine():
             surfaces[asset] = pygame.image.load(os.path.join("assets", asset)).convert_alpha()
         self.assets = surfaces
 
+    def updateCarPositions(self, state, Path):
+        distances = []
+
+        for id in state.players.keys():
+            closest_waypoint_index = min(range(len(Path)), key=lambda i: math.sqrt((Path[i][0] - state.players[id].player_x)**2 + (Path[i][1] - state.players[id].player_y)**2))
+            distances.append((id, closest_waypoint_index))
+
+        for ai_player in state.playersAI:
+            closest_waypoint_index = min(range(len(Path)), key=lambda i: math.sqrt((Path[i][0] - ai_player.player_x)**2 + (Path[i][1] - ai_player.player_y)**2))
+            distances.append((ai_player.id, closest_waypoint_index))
+            
+        sorted_cars = sorted(distances, key=lambda x: x[1], reverse=True)
+        state.car_order = [state.player_names.get(int(car[0]), None) for car in sorted_cars]
+        state.car_order = [car for car in state.car_order if car is not None]
+        
     def handle_actions(self, state, actions):
         if EVENT_ACCELF in actions:
             self.forward(state)
@@ -144,9 +159,12 @@ class GameEngine():
 
     def addPlayer(self, state, ID, player):
         state.players[ID] = player
+        state.player_names[ID] = f"Player {len(state.player_names) + 1}"
 
     def addPlayerAI(self, state, player):
+        ai_player_id = len(state.playersAI) + 1
         state.playersAI.append(player)
+        state.player_names[ai_player_id] = f"AI {len(state.playersAI)}"
     
     def setGameTime(self, state, seconds):
         state.gameTime = seconds
