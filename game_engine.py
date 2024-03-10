@@ -129,13 +129,13 @@ class GameEngine():
 
     def forward(self, state):
         temp_player = state.players[state.player_id]
-        audio.accelerateSound("accelerate.wav", 0.2)
+        audio.accelerateSound("accelerate.wav", 0.15)
         temp_player.vel = min(temp_player.vel + temp_player.acceleration, temp_player.max_vel)
         self.move(state)
 
     def backward(self, state):
         temp_player = state.players[state.player_id]
-        audio.accelerateSound("accelerate.wav", 0.2)
+        audio.accelerateSound("accelerate.wav", 0.15)
         temp_player.vel = max(temp_player.vel - temp_player.acceleration, -temp_player.max_vel)
         self.move(state)
 
@@ -354,9 +354,14 @@ class audio(GameEngine):
     def init():
         mixer.init()
 
-    def startMusic(file):
-        accel_sound = pygame.mixer.Sound(os.path.join("assets", file))
-        pygame.mixer.Sound.play(accel_sound)
+    def startMusic(file, volume):
+        music = pygame.mixer.Sound(os.path.join("assets", file))
+        music.set_volume(volume)
+        pygame.mixer.Sound.play(music, loops=-1)
+        return music
+
+    def stopMusic(file):
+        pygame.mixer.Sound.stop(file)
 
     def accelerateSound(file, volume):
         accel_sound = pygame.mixer.Sound(os.path.join("assets", file))
