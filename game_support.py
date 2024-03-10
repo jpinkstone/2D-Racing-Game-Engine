@@ -6,6 +6,8 @@ SPRITE_BLUE = "race_car3.png"
 SPRITE_PINK = "race_car1.png"
 CHECKPOINT_INDEX = 20
 
+music = None
+
 Path = [
     (778, 689), (960, 686), (1158, 689), (1251, 672), 
     (1194, 576), (1130, 512), (1200, 455), (1286, 379), (1248, 334),
@@ -90,7 +92,8 @@ def game_state(engine, state, userData):
                 playerAI.id = x+1
                 engine.addPlayerAI(state, playerAI)
         audio.init()
-        audio.startMusic("racing-125862.mp3")
+        global music
+        music = audio.startMusic("racing-125862.mp3", 0.7)
         assets = ["track.png", "track_mask.png", "race_car0.png", "race_car1.png", "race_car2.png", "race_car3.png"]
         engine.loadAssets(assets)
         engine.setGameTime(state, 60)
@@ -142,4 +145,6 @@ def done_state(engine, state, userData):
         state.startup = False
         state.players.clear()
         state.playersAI.clear()
+        global music
+        audio.stopMusic(music)
         state.cycle = "menu"
