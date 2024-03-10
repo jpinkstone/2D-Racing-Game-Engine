@@ -136,7 +136,7 @@ class GameEngine():
     def backward(self, state):
         temp_player = state.players[state.player_id]
         audio.accelerateSound("accelerate.wav", 0.2)
-        temp_player.vel = min(temp_player.vel - temp_player.acceleration, -temp_player.max_vel/2)
+        temp_player.vel = max(temp_player.vel - temp_player.acceleration, -temp_player.max_vel)
         self.move(state)
 
     def decelerate(self, state):
