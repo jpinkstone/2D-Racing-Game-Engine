@@ -169,7 +169,10 @@ class GameEngine():
 
     def addPlayer(self, state, ID, player):
         state.players[ID] = player
-        state.player_names[ID] = f"Player {len(state.player_names) + 1}"
+
+    def addPlayerNames(self,state):
+        for id in state.players.keys():
+            state.player_names[id] = f"Player {len(state.player_names) + 1}"
 
     def addPlayerAI(self, state, player):
         ai_player_id = len(state.playersAI) + 1
@@ -367,6 +370,3 @@ class audio(GameEngine):
         accel_sound = pygame.mixer.Sound(os.path.join("assets", file))
         accel_sound.set_volume(volume)
         pygame.mixer.Sound.play(accel_sound)
-
-class physics(GameEngine):
-    pass

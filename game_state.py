@@ -32,12 +32,6 @@ class GameState:
             self.time_vars = ['lastTime','firstPlace','gameTime']
         except:
             print("Initilization of Game State Failed.")
-
-    def gamestate_set_network_vars(self,list_of_var_names):
-        self.network_vars = list_of_var_names
-
-    def gamestate_set_player_sprite_files(self,list_of_sprite_files):
-        self.playerSprites = list_of_sprite_files
     
     def pack(self):
         encoded_data = ""
@@ -45,15 +39,15 @@ class GameState:
         # Pack the game state variables
         if self.isServer:
             encoded_data += self.pack_game_state()
-        
+        print(encoded_data)
         # Pack variables for local player
         if self.players:
             if self.player_id in self.players.keys():
                 encoded_data += self.pack_player_state(self.player_id,self.players[self.player_id])
             else:
-                encoded_data += "{" + str(self.player_id) + "}"  
+                encoded_data += "<" + str(self.player_id) + ">"  
         else:
-            encoded_data += "{" + str(self.player_id) + "}"
+            encoded_data += "<" + str(self.player_id) + ">"
 
         if self.isServer:
             for ai in self.playersAI:
@@ -68,18 +62,28 @@ class GameState:
         
         for key in game_state_vars.keys():
             if key in self.network_vars: 
-                encoded_data += str(game_state_vars[key]) + self.delimiter
+                value = game_state_vars[key]
+                if isinstance(value,str):
+                    value = '"' + value + '"'
+                if value == []: 
+                    value = "[]"
+                if value == {}: 
+                    value = "{}"
+                encoded_data += str(key) + "=" + str(value) + self.delimiter
+        encoded_data = encoded_data[:-1]
         return encoded_data
 
     # Pack the player state variables
     def pack_player_state(self,id,player):
-        encoded_data = "{" + str(id) + self.delimiter
+        encoded_data = "<" + str(id) + self.delimiter
         player_data = vars(player)
         
         for var in player_data:
             if var in player.network_vars:
-                encoded_data += str(player_data[var]) + self.delimiter
-        encoded_data += "}"
+                value = player_data[var]
+                if isinstance(value,str): value = '"' + value + '"'
+                encoded_data += str(var) + "=" + str(value) + self.delimiter
+        encoded_data = encoded_data[:-1] + ">"
         return encoded_data
     
     # Pack the AI state variables
@@ -88,9 +92,12 @@ class GameState:
         ai_data = vars(ai)
         for var in ai_data:
             if var in ai.network_vars:
-                encoded_data += str(ai_data[var]) + self.delimiter
-
-        encoded_data += ")"
+                value = ai_data[var]
+                if isinstance(value,str): 
+                    value = '"' + value + '"'
+                encoded_data += str(var) + "=" + str(value) + self.delimiter
+        
+        encoded_data = encoded_data[:-1] + ")"
         return encoded_data
 
     def unpack(self,encoded_data):
@@ -116,28 +123,25 @@ class GameState:
                 self.unpack_player_state(player_data)
 
     # Returns a list of undelimited player data for all players
-    def extract_player_states(self,encoded_data):
-        pattern = r'\{([^}]*)\}'  # Regular expression to match content within curly braces
+    def extract_player_states(self, encoded_data):
+        pattern = r'<([^>]*)>'  # Updated regular expression to match content within angle brackets
         matches = re.findall(pattern, encoded_data)
-        result_string = re.sub(pattern, '', encoded_data)
+        result_string = re.sub(pattern, self.delimiter, encoded_data)
         return matches, result_string
     
-    # Returns a list of undelimited AI data for all AI players
     def extract_ai_states(self, encoded_data):
         pattern = r'\(([^)]*)\)'  # Updated regular expression to match content within parentheses
         matches = re.findall(pattern, encoded_data)
-        result_string = re.sub(pattern, '', encoded_data)
+        result_string = re.sub(pattern, self.delimiter, encoded_data)
         return matches, result_string
     
     def unpack_new_ai(self,ai_data):
-        new_ai_var_values = ai_data.split(self.delimiter)
+        ai_data = ai_data.split(self.delimiter)
+        
         try:    
             new_ai = PlayerGameState(60,60)
-            for name, value in zip(new_ai.network_vars, new_ai_var_values):
-                if name == "sprite_id":
-                    exec(f'new_ai.{name} = "{value}"')
-                else:
-                    exec(f'new_ai.{name} = {value}')
+            for expr in ai_data:
+                exec(f'new_ai.{expr}')
             self.playersAI.append(new_ai)
         except KeyError:
             print("AI not found")
@@ -145,19 +149,15 @@ class GameState:
             print(f"Error unpacking new AI: {e}")
         except:
             pass
+         
 
-    
     def unpack_ai(self,ai_data,index):
-        new_ai_var_values = ai_data.split(self.delimiter)
+        ai_data = ai_data.split(self.delimiter)
         ai = self.playersAI[index]
-
+        
         try:
-            ai_var_names = vars(ai)
-            for name, value in zip(ai.network_vars, new_ai_var_values):
-                if name == "sprite_id":
-                    exec(f'ai.{name} = "{value}"')
-                else:
-                    exec(f'ai.{name} = {value}')
+            for expr in ai_data:
+                exec(f'ai.{expr}')
             self.playersAI[index] = ai
         except KeyError:
             print("AI not found")
@@ -169,65 +169,47 @@ class GameState:
     def unpack_game_state(self,decoded_data):
         game_state_vars = vars(self)
         i = 0
-        for key in game_state_vars.keys():
-            if key in self.network_vars:
-                value = decoded_data[i]
-                if key in self.time_vars and value != 'None':
-                    value = int(value)
-                if key == "car_order":
-                    exec(f'self.{key} = {value}')
-                    i = i + 1
-                    continue
-                setattr(self,key,value)
-                i = i + 1
-
+        for expr in decoded_data:
+            if not expr: continue
+            exec(f'self.{expr}')
+            
     def is_new_player(self,player_data):
-        player_var_values = player_data.split(self.delimiter)
-        id_string = player_var_values[0].strip()
+        player_data = player_data.split(self.delimiter)
+        id_string = player_data[0].strip()
         id = uuid.UUID(int=int(id_string)).int
         if id in self.players:
             return 0
         return 1
     
     def unpack_new_player_state(self,new_player_data):
-        new_player_var_values = new_player_data.split(self.delimiter)
-        id_string = new_player_var_values[0].strip()
+        new_player_data = new_player_data.split(self.delimiter)
+        id_string = new_player_data[0].strip()
         if id_string =='0':
             return
         id = uuid.UUID(int=int(id_string)).int
-        del new_player_var_values[0]
-
+        del new_player_data[0]
+       
         try:    
             new_player = PlayerGameState(60, 60)
-            new_player_var_names = vars(new_player)
-            for name, value in zip(new_player_var_names, new_player_var_values):
-                if name == "sprite_id":
-                    exec(f'new_player.{name} = "{value}"')
-                else:
-                    exec(f'new_player.{name} = {value}')
+            for expr in new_player_data:
+                 exec(f'new_player.{expr}')
             self.players[id] = new_player
-            self.player_names[id] = f'Player {len(self.players)}'
         except KeyError:
             print("Player not found")
         except Exception as e:
-            print(f"Error unpacking player: {e}")
+            print(f"Error unpacking new player: {e}")
         except:
             pass
 
     def unpack_player_state(self,player_data):
-        player_var_values = player_data.split(self.delimiter)
-        id_string = player_var_values[0].strip()
+        player_data = player_data.split(self.delimiter)
+        id_string = player_data[0].strip()
         id = uuid.UUID(int=int(id_string)).int
-        del player_var_values[0]
-
+        del player_data[0]
         try:    
             player = self.players[id]
-            player_var_names = player.network_vars
-            for var, value in zip(player_var_names, player_var_values):
-                if var == "sprite_id":
-                    exec(f'player.{var} = "{value}"')
-                else:
-                    exec(f'player.{var} = {value}')
+            for expr in player_data:
+                exec(f'player.{expr}')
             self.players[id] = player
         except KeyError:
             print("Player not found")

@@ -84,6 +84,7 @@ def game_state(engine, state, userData):
         player = PlayerGameState(60, 60)
         player.sprite_id = state.sprite_id
         engine.addPlayer(state, state.player_id, player)
+        engine.addPlayerNames(state)
         random.seed()
         if state.isServer:
             for x in range(4-len(state.players)):
@@ -145,6 +146,7 @@ def done_state(engine, state, userData):
         state.startup = False
         state.players.clear()
         state.playersAI.clear()
+        state.player_names.clear()
         global music
         audio.stopMusic(music)
         state.cycle = "menu"
