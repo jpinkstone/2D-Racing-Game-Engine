@@ -39,7 +39,7 @@ class GameState:
         # Pack the game state variables
         if self.isServer:
             encoded_data += self.pack_game_state()
-        print(encoded_data)
+            
         # Pack variables for local player
         if self.players:
             if self.player_id in self.players.keys():
@@ -171,7 +171,10 @@ class GameState:
         i = 0
         for expr in decoded_data:
             if not expr: continue
-            exec(f'self.{expr}')
+            try:
+                exec(f'self.{expr}')
+            except:
+                pass
             
     def is_new_player(self,player_data):
         player_data = player_data.split(self.delimiter)
@@ -192,7 +195,10 @@ class GameState:
         try:    
             new_player = PlayerGameState(60, 60)
             for expr in new_player_data:
-                 exec(f'new_player.{expr}')
+                try:
+                    exec(f'new_player.{expr}')
+                except:
+                    pass
             self.players[id] = new_player
         except KeyError:
             print("Player not found")
@@ -209,7 +215,10 @@ class GameState:
         try:    
             player = self.players[id]
             for expr in player_data:
-                exec(f'player.{expr}')
+                try:
+                    exec(f'player.{expr}')
+                except:
+                    pass
             self.players[id] = player
         except KeyError:
             print("Player not found")

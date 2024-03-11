@@ -61,6 +61,7 @@ def cycle(engine, state, userData):
     elif state.cycle == "done": done_state(engine, state, userData)
 
 def menu_state(engine, state, userData):
+    state.startup = False
     engine.screenFill((200, 200, 200))
     engine.loadAssets(["splash.jpg"])
     engine.addSplash("splash.jpg", state.dimensions)
