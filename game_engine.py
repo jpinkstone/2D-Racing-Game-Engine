@@ -205,13 +205,10 @@ class PlayerAI(PlayerGameState):
 
         if self.distance_to_waypoint() < 5:
             self.current_waypoint = self.path[(self.path.index(self.current_waypoint) + 1) % len(self.path)]
-            # print("cur waypoint " + str(self.current_waypoint[0]) +  " "  + str(self.current_waypoint[1]))
         self.move_towards(self.current_waypoint)
 
     def distance_to_waypoint(self):
         if self.current_waypoint:
-            # dist = math.sqrt((self.current_waypoint[0] - self.player_x)**2 + (self.current_waypoint[1] - self.player_y)**2)
-            # print(dist)
             return math.sqrt((self.current_waypoint[0] - self.player_x)**2 + (self.current_waypoint[1] - self.player_y)**2)
         return float('inf')
 
