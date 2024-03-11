@@ -39,7 +39,7 @@ class GameState:
         # Pack the game state variables
         if self.isServer:
             encoded_data += self.pack_game_state()
-        print(encoded_data)
+        
         # Pack variables for local player
         if self.players:
             if self.player_id in self.players.keys():
@@ -149,7 +149,6 @@ class GameState:
             print(f"Error unpacking new AI: {e}")
         except:
             pass
-         
 
     def unpack_ai(self,ai_data,index):
         ai_data = ai_data.split(self.delimiter)
@@ -188,11 +187,11 @@ class GameState:
             return
         id = uuid.UUID(int=int(id_string)).int
         del new_player_data[0]
-       
+        
         try:    
             new_player = PlayerGameState(60, 60)
             for expr in new_player_data:
-                 exec(f'new_player.{expr}')
+                exec(f'new_player.{expr}')
             self.players[id] = new_player
         except KeyError:
             print("Player not found")
