@@ -31,7 +31,6 @@ while (state.status != "stopped"):
 
     networkData = net.receive()       # Receive connected player data and update game
     if networkData != None:
-        #print(networkData)
         state.unpack(networkData)
 
     cycle(engine, state, userData)    # Update the game cycle

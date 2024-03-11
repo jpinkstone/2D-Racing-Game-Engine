@@ -149,7 +149,6 @@ class GameState:
             print(f"Error unpacking new AI: {e}")
         except:
             pass
-         
 
     def unpack_ai(self,ai_data,index):
         ai_data = ai_data.split(self.delimiter)
@@ -191,7 +190,7 @@ class GameState:
             return
         id = uuid.UUID(int=int(id_string)).int
         del new_player_data[0]
-       
+        
         try:    
             new_player = PlayerGameState(60, 60)
             for expr in new_player_data:
